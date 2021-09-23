@@ -1,0 +1,3 @@
+<launch>
+  <node name="pose_estimation_node" pkg="pose_estimation" type="pose_est_server" output="screen"/>
+</launch>
