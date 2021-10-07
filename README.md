@@ -3,8 +3,8 @@
 ## Initialize Environment 
 ```bash
 cd Eit-ROS
-catkin_make
 source devel/setup.bash 
+catkin_make
 ```
 
 ## Launch system 
