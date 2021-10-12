@@ -1,0 +1,3 @@
+<launch>
+	<node pkg="ur_robot_pkg" name="talker" type="ur_robot_node.py" output="screen"/>
+</launch>
