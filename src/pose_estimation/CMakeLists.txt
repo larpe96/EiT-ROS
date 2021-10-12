@@ -7,13 +7,16 @@ project(pose_estimation)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+SET("OpenCV_DIR" "/usr/share/OpenCV")
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-  sensor_msgs
+  OpenCV
+  cv_bridge
   geometry_msgs
+  image_transport
   message_generation
+  roscpp
+  sensor_msgs
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -57,10 +60,12 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-    FILES
-    pose_est_srv.srv
-  )
+add_service_files(DIRECTORY srv FILES pose_est_srv.srv)
+# add_service_files(
+#   FILES
+#   Service1.srv
+#   Service2.srv
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -69,13 +74,15 @@ find_package(catkin REQUIRED COMPONENTS
 #   Action2.action
 # )
 
+
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
+generate_messages(
    DEPENDENCIES
    std_msgs
    sensor_msgs
    geometry_msgs
  )
+
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -107,9 +114,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES pose_estimation
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+   INCLUDE_DIRS include
+  LIBRARIES pose_estimation
+  CATKIN_DEPENDS
+    roscpp # OpenCV cv_bridge geometry_msgs image_transport message_generation roscpp sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -120,14 +128,14 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/pose_estimation.cpp
-# )
+ add_library(${PROJECT_NAME}
+   src/${PROJECT_NAME}.cc
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -139,6 +147,9 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/pose_estimation_node.cpp)
 
+add_executable(${PROJECT_NAME}_node src/pose_estimation_node.cc)
+target_link_libraries(pose_estimation_node pose_estimation ${catkin_LIBRARIES})
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -147,12 +158,12 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(${PROJECT_NAME}_node
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -176,18 +187,18 @@ include_directories(
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
-# install(TARGETS ${PROJECT_NAME}
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-# )
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+)
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 #   FILES_MATCHING PATTERN "*.h"
 #   PATTERN ".svn" EXCLUDE
-# )
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
@@ -209,6 +220,12 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(pose_est_server src/main_pose_est.cpp)
+set( project_sources
+   src/pose_estimation.cc
+   src/pose_estimation_node.cc
+)
+
+add_executable(pose_est_server ${project_sources})
 target_link_libraries(pose_est_server ${catkin_LIBRARIES})
+target_link_libraries(pose_est_server  ${OpenCV_LIBS})
 add_dependencies(pose_est_server pose_estimation_gencpp)

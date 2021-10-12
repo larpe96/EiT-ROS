@@ -1,3 +1,2 @@
-sensor_msgs/Image image
 ---
-geometry_msgs/Pose rel_object_pose
+geometry_msgs/PoseArray rel_object_poses

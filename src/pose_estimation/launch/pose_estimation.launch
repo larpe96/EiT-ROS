@@ -1,3 +1,6 @@
 <launch>
-  <node name="pose_estimation_node" pkg="pose_estimation" type="pose_est_server" output="screen"/>
+  <node name="pose_estimation" pkg="pose_estimation" type="pose_estimation_node" output="screen" respawn="true"></node>
+
+  <include file="$(find openni2_launch)/launch/openni2.launch"></include>
+
 </launch>
