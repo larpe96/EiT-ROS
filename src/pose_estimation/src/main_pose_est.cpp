@@ -6,6 +6,9 @@ bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
 		    pose_estimation::pose_est_srv::Response  &res)
 {
 	// Only for viewving progess in the terminal
+	res.rel_object_pose.position.x = 10;
+	res.rel_object_pose.position.y = 10;
+	res.rel_object_pose.position.z = 10;
 	ROS_INFO("pose was estimated"); 
 	return true; 
 }

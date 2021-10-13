@@ -1,3 +1,7 @@
+# Dirs
+fmauch_universal_robot/
+Universal_Robots_ROS_Driver/
+
 src/CMakeLists.txt
 .catkin_workspace
 devel/

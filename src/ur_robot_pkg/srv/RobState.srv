@@ -1,0 +1,5 @@
+---
+bool isConnected
+bool isProtectiveStopped
+bool isEmergencyStopped
+bool isSteady
