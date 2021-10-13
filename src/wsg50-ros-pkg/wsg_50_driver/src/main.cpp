@@ -560,7 +560,6 @@ int main( int argc, char **argv )
 
    if (res_con == 0 ) {
         ROS_INFO("Gripper connection stablished");
-
 		// Services
         ros::ServiceServer moveSS, graspSS, releaseSS, homingSS, stopSS, ackSS, incrementSS, setAccSS, setForceSS;
 
@@ -593,7 +592,7 @@ int main( int argc, char **argv )
 		ROS_INFO("Ready to use. Homing and taring now...");
 		homing();
         ros::Duration(0.5).sleep();
-        doTare();
+//        doTare(); larpe17
 
 		if (grasping_force > 0.0) {
 			ROS_INFO("Setting grasping force limit to %5.1f", grasping_force);
