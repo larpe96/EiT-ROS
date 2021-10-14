@@ -21,8 +21,8 @@ Position_control::Position_control()
     }
     
     robState_service = n.serviceClient<ur_robot_pkg::RobState>("GET/robot_state_srv");
-    move2DefPos_service = n.advertiseService("move2_def_pos_srv", & Position_control::move2DefPos, this);
-    pos_service = n.advertiseService("move2_pos_srv", & Position_control::position_controller, this);
+    move2DefPos_service = n.advertiseService("move2_def_pos_srv", &Position_control::move2DefPos, this);
+    pos_service = n.advertiseService("move2_pos_srv", &Position_control::position_controller, this);
 
 } 
 
@@ -40,10 +40,14 @@ bool Position_control::move2DefPos(position_controller_pkg::Pre_def_pose::Reques
 {
     int pose_no = req.pre_def_pose;
     int rob_status = getRobState();
-    if(rob_status !=SUCCESS)
-        return rob_status;
+    if(rob_status != SUCCESS)
+    {
+        res.succes = SERVICE_NOT_SUCC_COMPLETED;
+        return false;
+    }
 
-    std::ifstream file("src/position_controller_pkg/etc/"+std::to_string(pose_no)+".eit");
+    std::fstream file;
+    file.open("/home/user/workspace/src/position_controller_pkg/etc/"+std::to_string(pose_no)+".eit");
     std::string str;
     if(!file.is_open())
     {
@@ -58,7 +62,6 @@ bool Position_control::move2DefPos(position_controller_pkg::Pre_def_pose::Reques
     {  
        pos_elements.push_back(std::stod(str)); 
     }
-
     ur_robot_pkg::p2p_cmove srv;
     srv.request.acc = std_acc;
     srv.request.vel = std_vel;
@@ -73,9 +76,15 @@ bool Position_control::move2DefPos(position_controller_pkg::Pre_def_pose::Reques
     pose.orientation.w = pos_elements.at(6);
     srv.request.pose = pose;
     bool rob_suc = p2p_service.call(srv);
+
     if (srv.response.succes)
-        return SUCCESS;
-    return SERVICE_NOT_SUCC_COMPLETED;     
+    {	
+        res.succes = SUCCESS;
+        return true;
+    }
+    res.succes = SERVICE_NOT_SUCC_COMPLETED;
+    return false;    
+     
 }
 
 
