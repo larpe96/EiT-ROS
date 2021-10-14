@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import rospy
 from rospy.impl.tcpros_service import wait_for_service
 from std_msgs.msg import String
@@ -52,5 +53,17 @@ if __name__ == "__main__":
     print("========resp:========\n%s\n========END========\n"%resp_mov)
 
 
+    print("enable Free drive")
+    rospy.wait_for_service("SET/enable_teach")
+    enabl_freeDrive = rospy.ServiceProxy("SET/enable_teach", Trigger)
+    resp_enab = enabl_freeDrive()
+    print("========resp:========\n%s\n========END========\n"%resp_enab)
+    
+    
+    print("disable Free drive")
+    rospy.wait_for_service("SET/enable_teach")
+    disabl_freeDrive = rospy.ServiceProxy("SET/disable_teach", Trigger)
+    resp_disp = disabl_freeDrive()
+    print("========resp:========\n%s\n========END========\n"%resp_disp)
 
     # 34 mm offset in tcp z
