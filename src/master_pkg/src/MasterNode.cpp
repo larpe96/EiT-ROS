@@ -163,7 +163,7 @@ int MasterNode::callServicePoseEstimate()
 
     if(pose_estim_client.call(msg))
     {
-        if (sizeof(msg.response.rel_object_poses.poses) == 0)
+        if (msg.response.rel_object_poses.poses.size() == 0)
           {
             return 2;
           }
