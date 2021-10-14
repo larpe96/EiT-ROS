@@ -11,13 +11,13 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  std_srvs
   message_generation
   geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -59,6 +59,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   Tcp_move.srv
+  Pre_def_pose.srv
 #  Service2.srv
 )
 
@@ -73,6 +74,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
    std_msgs
+   std_srvs
    geometry_msgs
   
 )
@@ -163,10 +165,10 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# catkin_install_python(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+catkin_install_python(PROGRAMS
+ scripts/setPreDefPos.py
+ DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
@@ -208,6 +210,6 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-add_executable(position_controller_server src/position_controller_main.cpp)
+add_executable(position_controller_server src/position_controller_main.cpp src/Position_control.cpp)
 target_link_libraries(position_controller_server ${catkin_LIBRARIES})
 add_dependencies(position_controller_server position_controller_pkg_gencpp)

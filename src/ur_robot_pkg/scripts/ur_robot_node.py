@@ -3,6 +3,7 @@ from rtde_control import RTDEControlInterface as RTDEControl
 from rtde_receive import RTDEReceiveInterface as RTDEReceive
 from rtde_io import RTDEIOInterface as RTDEIO
 import rospy
+from rospy.exceptions import ROSInterruptException
 from std_msgs.msg import String
 from std_srvs.srv import Trigger
 from geometry_msgs.msg import Pose, Point, Quaternion
@@ -58,6 +59,21 @@ class Robot(RTDEControl, RTDEReceive, RTDEIO):
         quat = Quaternion(_ori[0],_ori[1],_ori[2],_ori[3])
         return Pose(point_, quat)
 
+    def cb_enable_teach(self, req):
+        res = self.teachMode()
+        if res:
+            return True, "Robot in free drive"
+        else:
+            return False, "Unable to set robot in free drive"
+        
+
+    def cb_disable_teach(self, req):
+        res = self.endTeachMode()
+        if res:
+            return True, "Disabled free drive"
+        else:
+            return False, "Was not able to disable free drive"
+
 class Servicenode(Robot):
     def __init__(self, _ip):
         self.robot = Robot(_ip)
@@ -67,6 +83,8 @@ class Servicenode(Robot):
     def init_serivices(self):
         srv_test = rospy.Service("urtest/ur_test_srv", Trigger, self.robot.cb_test)
         srv_p2p_Cmove = rospy.Service("SET/p2p_Cmove_srv", p2p_cmove, self.robot.cb_p2p_cmove)
+        srv_enable_teach = rospy.Service("SET/enable_teach", Trigger, self.robot.cb_enable_teach)
+        srv_disable_teach = rospy.Service("SET/disable_teach",Trigger, self.robot.cb_disable_teach)
         srv_jointQ = rospy.Service("GET/jointQ_srv", jointQs, self.robot.cb_get_joint_state)
         srv_rob_state = rospy.Service("GET/robot_state_srv", RobState, self.robot.cb_get_RobState)
         srv_Tcp_pose = rospy.Service("GET/tcp_pose_srv", CurrTCPPose, self.robot.cb_get_TCP_Pose)
@@ -84,10 +102,18 @@ class Servicenode(Robot):
 
 
 if __name__ =="__main__":
-    # _ip = "127.0.0.1" # VM
     _ip = "192.168.1.68" # Robot
-
     try:
         ser_node = Servicenode(_ip)
-    except rospy.ROSInterruptException:
+    except ROSInterruptException:
         pass
+    except:
+        print("robot connection failed")
+        print("Trying VM")
+        try:
+            _ip = "127.0.0.1" # VM
+            ser_node = Servicenode(_ip)
+        except ROSInterruptException:
+            pass
+
+    

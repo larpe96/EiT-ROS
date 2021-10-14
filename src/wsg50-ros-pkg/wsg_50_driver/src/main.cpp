@@ -534,7 +534,7 @@ int main( int argc, char **argv )
    nh.param("protocol", protocol, std::string(""));
    nh.param("com_mode", com_mode, std::string(""));
    nh.param("rate", rate, 1.0); // With custom script, up to 30Hz are possible
-   nh.param("grasping_force", grasping_force, 0.0);
+   nh.param("grasping_force", grasping_force, 2.0); // before 0.0 larpe17
 
    if (protocol == "udp")
        use_udp = true;
