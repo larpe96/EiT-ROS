@@ -35,7 +35,7 @@ private:
     ros::ServiceServer move2DefPos_service;
     ros::ServiceClient p2p_service;
     ros::ServiceClient robState_service;
-    int32_t max_waiting_time= 25; // mili seconds
+    int32_t max_waiting_time= -1; // mili seconds
     double std_vel = 0.5;
     double std_acc = 0.05;
     /* Functions */
