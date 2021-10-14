@@ -49,12 +49,12 @@ int MasterNode::setupServices()
   int setupBool = 1;
 
   //Wait for the service
-  setupBool = ros::service::waitForService("pose_est", 10);
+  // setupBool = ros::service::waitForService("pose_est", 10);
 
-  if (setupBool == 0)
-  {
-    return 0;
-  }
+  // if (setupBool == 0)
+  // {
+  //   return 0;
+  // }
   setupBool = ros::service::waitForService("move2_pos_srv", 10);
   if (setupBool == 0)
   {
@@ -83,7 +83,7 @@ int MasterNode::setupServices()
   
   
   //client services
-  pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
+  // pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
   tcp_control_client = n.serviceClient<position_controller_pkg::Tcp_move>("move2_pos_srv");
   tcp_pre_def_control_client = n.serviceClient<position_controller_pkg::Tcp_move>("move2_def_pose_srv");
 
@@ -254,7 +254,7 @@ void MasterNode::stateLoop()
     break;
   case  get_pose:
     {
-      int res = callServicePoseEstimate(); 
+      int res =1;// callServicePoseEstimate(); 
       if( res == 1 )
       {
         state = move_to_pose;
@@ -270,7 +270,8 @@ void MasterNode::stateLoop()
       break;
     }
   case  move_to_pose:
-    state = callServiceTcpMove() ? grasp_obj : error;
+    //state = callServiceTcpMove() ? grasp_obj : error;
+    state = callServicePreMove(2) ? grasp_obj : error;
     break;
   case  grasp_obj:
     state = callServiceGripperGrasp(22,50) ? move_with_obj : error;
