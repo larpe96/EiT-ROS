@@ -9,7 +9,7 @@ std::vector<cv::Point2f> PoseEstimation::Detect(cv::Mat &img_msg)
   img_msg.copyTo(img);
 
   // Crop image
-  img = img(cv::Range(155,314), cv::Range(205,318));
+  //img = img(cv::Range(155,314), cv::Range(205,318));
 
   backProj = cv::Mat::zeros(img.cols, img.rows, CV_16S);
 
@@ -34,8 +34,6 @@ std::vector<cv::Point2f> PoseEstimation::Detect(cv::Mat &img_msg)
   {
       cv::dilate(bin_image, bin_image, structuring_element );
   }
-
-  cv::waitKey(1);
 
   center_points = find_center_points(bin_image);
   return center_points;

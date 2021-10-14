@@ -5,15 +5,13 @@
 #include <sensor_msgs/Image.h>
 #include "std_msgs/Bool.h"
 #include <string>
+#include <opencv/highgui.h>
 
 PoseEstimation detector;
+cv::Mat img;
 
-bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
-		                pose_estimation::pose_est_srv::Response  &res)
+void OnImage(const sensor_msgs::ImageConstPtr& img_msg)
 {
-	sensor_msgs::ImageConstPtr img_msg =  ros::topic::waitForMessage<sensor_msgs::Image>("/camera/rgb/image_raw", ros::Duration(10));
-
-	// Convert msg to CvImage
 	cv_bridge::CvImagePtr cv_ptr;
 	try
 	{
@@ -22,11 +20,17 @@ bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
 	catch (cv_bridge::Exception& e)
 	{
 		ROS_ERROR("cv_bridge exception: %s", e.what());
-		return false;
 	}
+	img = cv_ptr->image;
+	cv::imshow("test", img);
+	cv::waitKey(1);
+}
 
+bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
+		                pose_estimation::pose_est_srv::Response  &res)
+{
 	std::vector<cv::Point2f> object_points;
-	object_points = detector.Detect(cv_ptr->image);
+	object_points = detector.Detect(img);
 
 	geometry_msgs::PoseArray posearray;
 	posearray.header.stamp = ros::Time::now();
@@ -35,7 +39,7 @@ bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
 	{
 		geometry_msgs::Pose p;
 		p.position.x = object_points[i].x;
-    p.orientation.x = object_points[i].y;
+    	p.orientation.x = object_points[i].y;
 		posearray.poses.push_back(p);
 	}
 	res.rel_object_poses = posearray;
@@ -50,6 +54,7 @@ int main(int argc, char** argv)
   // Initialize ROS
   ros::init(argc, argv, "pose_estimation");
   ros::NodeHandle nh;
+  ros::Subscriber subscriber = nh.subscribe("/camera/rgb/image_raw", 1, OnImage);
 
   // Detector
   cv::Mat img_background = cv::imread("../EiT_workspace/src/pose_estimation/src/background.jpg");
