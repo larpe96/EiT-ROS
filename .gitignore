@@ -140,3 +140,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 src/pose_estimation/.vscode/settings.json
+
+.catkin_tools/
+/logs
