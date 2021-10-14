@@ -42,8 +42,8 @@ bool Position_control::move2DefPos(position_controller_pkg::Pre_def_pose::Reques
     int rob_status = getRobState();
     if(rob_status !=SUCCESS)
         return rob_status;
-
-    std::ifstream file("src/position_controller_pkg/etc/"+std::to_string(pose_no)+".eit");
+    std::fstream file;
+    file.open("/home/user/src/position_controller_pkg/etc/"+std::to_string(pose_no)+".eit");
     std::string str;
     if(!file.is_open())
     {
