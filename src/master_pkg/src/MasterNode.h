@@ -45,6 +45,8 @@ public:
   ~MasterNode();
 
   void stateLoop(); 
+  std::string getState();
+
 protected:
   int callServicePoseEstimate();
   bool callServiceTcpMove();

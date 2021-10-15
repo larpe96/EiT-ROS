@@ -229,14 +229,13 @@ bool MasterNode::callServicePreMove(int pose_id)
     }
 }
 
+std::string MasterNode::getState()
+{
+  return state_name[state];
+}
+
 void MasterNode::stateLoop()
 {
-
-  //pose_estimation::pose_est_srv msg = callServicePoseEstimate();
-
-  //std::cout << msg.response << std::endl;
-  std::cout << state_name[state] << std::endl;
-
   switch(state) {
   case  init:
        
