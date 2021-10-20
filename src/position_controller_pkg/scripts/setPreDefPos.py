@@ -4,7 +4,7 @@ from std_srvs.srv import Trigger
 from geometry_msgs.msg import Pose
 from ur_robot_pkg.srv import CurrTCPPose
 
-
+PREFIX = ""
 
 if __name__ == "__main__":
     rospy.init_node("SetPoses")
@@ -28,7 +28,7 @@ if __name__ == "__main__":
             print("Terminating program")
             break
         pos_res = get_tcp()
-        file = open("../etc/"+str(i)+".eit", "w")
+        file = open("../etc/"+PREFIX+str(i)+".eit", "w")
         file.write(str(pos_res.position.position.x)+"\n")
         file.write(str(pos_res.position.position.y)+"\n")
         file.write(str(pos_res.position.position.z)+"\n")

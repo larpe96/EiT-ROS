@@ -205,11 +205,11 @@ bool MasterNode::callServiceTcpMove()
     }
 }
 
-bool MasterNode::callServicePreMove(int pose_id)
+bool MasterNode::callServicePreMove(std::string pose_name)
 {
     position_controller_pkg::Pre_def_pose msg;
 
-    msg.request.pre_def_pose = pose_id;
+    msg.request.pre_def_pose = pose_name;
 
     if (!tcp_pre_def_control_client.call(msg))
     {
@@ -272,7 +272,7 @@ void MasterNode::stateLoop()
     }
   case  move_to_pose:
     //state = callServiceTcpMove() ? grasp_obj : error;
-    state = callServicePreMove(2) ? grasp_obj : error;
+    state = callServicePreMove("2") ? grasp_obj : error;
     break;
   case  grasp_obj:
     state = callServiceGripperGrasp(22,50) ? move_with_obj : error;
