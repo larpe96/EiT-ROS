@@ -20,8 +20,8 @@
 #include "master_pkg/gripper_Move.h"
 #include "master_pkg/gripper_Conf.h"
  
-#define home_pos_index  0
-#define drop_off_pos_index 1
+#define home_pos_index  "0"
+#define drop_off_pos_index "1"
 
 enum State
 {
@@ -45,13 +45,15 @@ public:
   ~MasterNode();
 
   void stateLoop(); 
+  std::string getState();
+
 protected:
   int callServicePoseEstimate();
   bool callServiceTcpMove();
   bool callServiceGripperMove(float width,float speed);
   bool callServiceGripperGrasp(float width,float speed);
   bool callServiceGripperSetForce(float force);
-  bool callServicePreMove(int pose_id);
+  bool callServicePreMove(std::string pose_name);
 
   
 

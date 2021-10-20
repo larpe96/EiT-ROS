@@ -57,7 +57,7 @@ int main(int argc, char** argv)
   ros::Subscriber subscriber = nh.subscribe("/camera/rgb/image_raw", 1, OnImage);
 
   // Detector
-  cv::Mat img_background = cv::imread("../EiT/src/pose_estimation/src/background.jpg");
+  cv::Mat img_background = cv::imread("../EiT-ROS/src/pose_estimation/src/background.jpg");
   detector.calibrate_background(img_background);
   //detector.show_hist(detector.background_histogram);
 

@@ -1,4 +1,5 @@
 <launch>
+  <include file="$(find ur_robot_pkg)/launch/ur_driver.launch"/>
   <node name="position_controller_node" pkg="position_controller_pkg"
      type="position_controller_server" output="screen"/>
 </launch>

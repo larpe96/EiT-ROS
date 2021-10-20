@@ -14,18 +14,17 @@ void mySigintHandler(int sig)
 int main(int argc, char **argv)
 {
 
-   ros::init(argc, argv, "master");
-   MasterNode node;
+  ros::init(argc, argv, "master");
+  MasterNode node;
+  signal(SIGINT, mySigintHandler); 
+  ros::Rate r(1);                                                                                                                                             
 
-   ros::Rate r(1);                                                                                                                                             
-
-   while(run_loop)                                                                                                                                               
-   {                          
-            ros::spinOnce();                                                                                                                                                                                                                                                                    
-            node.stateLoop();
-            r.sleep();     
-            signal(SIGINT, mySigintHandler);                                                                                                                                      
-   }  
-   
+  while(run_loop)                                                                                                                                               
+  {                          
+          ros::spinOnce();                                                                                                                                                                                                                                                                    
+          node.stateLoop();
+          r.sleep();
+          ROS_INFO("Master state:  %s", (node.getState()).c_str());     
+  }  
    return 0;
 };

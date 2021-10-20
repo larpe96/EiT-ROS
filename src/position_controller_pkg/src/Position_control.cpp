@@ -38,7 +38,7 @@ bool Position_control::position_controller(position_controller_pkg::Tcp_move::Re
 
 bool Position_control::move2DefPos(position_controller_pkg::Pre_def_pose::Request &req, position_controller_pkg::Pre_def_pose::Response &res)
 {
-    int pose_no = req.pre_def_pose;
+    std::string pose_name = req.pre_def_pose;
     int rob_status = getRobState();
     if(rob_status != SUCCESS)
     {
@@ -47,7 +47,7 @@ bool Position_control::move2DefPos(position_controller_pkg::Pre_def_pose::Reques
     }
 
     std::fstream file;
-    file.open("/home/user/workspace/src/position_controller_pkg/etc/"+std::to_string(pose_no)+".eit");
+    file.open("/home/user/workspace/src/position_controller_pkg/etc/"+pose_name+".eit");
     std::string str;
     if(!file.is_open())
     {
