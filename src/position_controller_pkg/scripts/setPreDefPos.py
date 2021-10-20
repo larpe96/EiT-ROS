@@ -4,7 +4,7 @@ from std_srvs.srv import Trigger
 from geometry_msgs.msg import Pose
 from ur_robot_pkg.srv import CurrTCPPose
 
-PREFIX = ""
+PREFIX = "cali_"
 
 if __name__ == "__main__":
     rospy.init_node("SetPoses")
