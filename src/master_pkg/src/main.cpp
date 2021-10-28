@@ -18,10 +18,8 @@ int main(int argc, char **argv)
   MasterNode node;
   signal(SIGINT, mySigintHandler); 
   ros::Rate r(1);                                                                                                                                             
-
   while(run_loop)                                                                                                                                               
-  {                          
-          ros::spinOnce();                                                                                                                                                                                                                                                                    
+  {		 ros::spinOnce();                                                                                                                                                                                                                                                                    
           node.stateLoop();
           r.sleep();
           ROS_INFO("Master state:  %s", (node.getState()).c_str());     

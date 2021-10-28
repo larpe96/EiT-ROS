@@ -9,6 +9,7 @@ from std_srvs.srv import Trigger
 from geometry_msgs.msg import Pose, Point, Quaternion
 from scipy.spatial.transform import Rotation as R
 import numpy as np
+import time
 
 from ur_robot_pkg.srv import p2p_cmove, jointQs, RobState, CurrTCPPose
 
@@ -32,6 +33,7 @@ class Robot(RTDEControl, RTDEReceive, RTDEIO):
         req_pos = [req_pose.position.x,req_pose.position.y,req_pose.position.z]
         ur_pose = np.ravel([req_pos,req_q.as_rotvec()])
         b = self.moveL(ur_pose,vel, acc, req.move_async)
+        time.sleep(1) # is needed to assure that the robot is ready (empirical tested)
         if b:
             str = "OK"
         else:
@@ -65,7 +67,7 @@ class Robot(RTDEControl, RTDEReceive, RTDEIO):
             return True, "Robot in free drive"
         else:
             return False, "Unable to set robot in free drive"
-        
+
 
     def cb_disable_teach(self, req):
         res = self.endTeachMode()
@@ -88,7 +90,7 @@ class Servicenode(Robot):
         srv_jointQ = rospy.Service("GET/jointQ_srv", jointQs, self.robot.cb_get_joint_state)
         srv_rob_state = rospy.Service("GET/robot_state_srv", RobState, self.robot.cb_get_RobState)
         srv_Tcp_pose = rospy.Service("GET/tcp_pose_srv", CurrTCPPose, self.robot.cb_get_TCP_Pose)
-        rospy.spin()    
+        rospy.spin()
 
 
 # def test(robot):
@@ -115,5 +117,3 @@ if __name__ =="__main__":
             ser_node = Servicenode(_ip)
         except ROSInterruptException:
             pass
-
-    

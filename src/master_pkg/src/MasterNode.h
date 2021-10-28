@@ -19,15 +19,18 @@
 #include "master_pkg/system_state_srv.h"
 #include "master_pkg/gripper_Move.h"
 #include "master_pkg/gripper_Conf.h"
- 
-#define home_pos_index  "0"
-#define drop_off_pos_index "1"
+
+#define home_pose_name  "pose_2"
+#define grasp_pose_name "pose_0"
+#define approach_pose_name "pose_1"
+#define drop_off_pose_name "pose_3"
 
 enum State
 {
   error,
   init,
   get_pose,
+  approach_pose,
   move_to_pose,
   grasp_obj,
   move_with_obj,
@@ -40,11 +43,11 @@ class MasterNode
 public:
   //! Constructor.
   MasterNode();
-  
+
   //! Destructor.
   ~MasterNode();
 
-  void stateLoop(); 
+  void stateLoop();
   std::string getState();
 
 protected:
@@ -55,7 +58,7 @@ protected:
   bool callServiceGripperSetForce(float force);
   bool callServicePreMove(std::string pose_name);
 
-  
+
 
   int setupServices();
   bool setupNodes();
@@ -71,13 +74,13 @@ protected:
 
   ros::ServiceClient tcp_control_client;
   ros::ServiceClient tcp_pre_def_control_client;
-  
+
   ros::ServiceServer system_state_server;
 
-  
+
   State state = init;
   ros::NodeHandle n;
-  const char *state_name[8] = { "error","init", "get_pose",
+  const char *state_name[9] = { "error","init", "get_pose","approach_pose",
                             "move_to_pose","grasp_obj", "move_with_obj",
                             "drop_obj", "home"};
 

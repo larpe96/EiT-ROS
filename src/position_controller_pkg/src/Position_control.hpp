@@ -28,16 +28,16 @@ enum Errors
 class Position_control
 {
 private:
-	
+
     /* data */
-	ros::NodeHandle n; 
+	ros::NodeHandle n;
     ros::ServiceServer pos_service;
     ros::ServiceServer move2DefPos_service;
     ros::ServiceClient p2p_service;
     ros::ServiceClient robState_service;
     int32_t max_waiting_time= -1; // mili seconds
-    double std_vel = 0.5;
-    double std_acc = 0.05;
+    double std_vel = 1.25;
+    double std_acc = 0.20;
     /* Functions */
     int move2Pose(position_controller_pkg::Tcp_move::Request &req, ur_robot_pkg::p2p_cmove::Response & res);
     int getRobState();

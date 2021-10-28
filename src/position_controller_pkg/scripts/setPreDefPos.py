@@ -4,7 +4,7 @@ from std_srvs.srv import Trigger
 from geometry_msgs.msg import Pose
 from ur_robot_pkg.srv import CurrTCPPose
 
-PREFIX = "cali_"
+PREFIX = "pose_"
 
 if __name__ == "__main__":
     rospy.init_node("SetPoses")
@@ -12,16 +12,15 @@ if __name__ == "__main__":
     get_tcp = rospy.ServiceProxy("GET/tcp_pose_srv", CurrTCPPose)
     enabl_freeDrive = rospy.ServiceProxy("SET/enable_teach", Trigger)
     disabl_freeDrive = rospy.ServiceProxy("SET/disable_teach", Trigger)
-
-    answer = input("would you like to add a pose? (y/n): ")
     i =0
+    answer = 'y'
     while(answer != "n"):
         res_en = enabl_freeDrive()
         if not res_en.success:
             print(res_en.message)
             print("Terminating program")
             break
-        input("move to desired pos and press enter")
+        answer = input("move to desired pos and press enter")
         dis_res = disabl_freeDrive()
         if not dis_res.success:
             print(dis_res.message)
@@ -38,9 +37,7 @@ if __name__ == "__main__":
         file.write(str(pos_res.position.orientation.w)+"\n")
         file.close()
         i = i+1
-
-
-        answer = input("would you like to add a new pose? (y/n): ")
+        print("saving file: " + PREFIX +str(i) + ".eit")
 
     res = disabl_freeDrive()
     print(res.success, res.message)

@@ -6,30 +6,30 @@ Position_control::Position_control()
     bool is_not_time_out = false;
     n = ros::NodeHandle();
     is_not_time_out = ros::service::waitForService("/SET/p2p_Cmove_srv",max_waiting_time);
-    
+
     if(!is_not_time_out)
     {
         std::cerr<<"TIMEOUT!!"<<std::endl;
     }
 
     p2p_service = n.serviceClient<ur_robot_pkg::p2p_cmove>("/SET/p2p_Cmove_srv");
-   
+
     is_not_time_out = ros::service::waitForService("GET/robot_state_srv", max_waiting_time);
-    if(!is_not_time_out)
+    if(!is_not_time_out)  
     {
         std::cerr<<"TIMEOUT!!"<<std::endl;
     }
-    
+
     robState_service = n.serviceClient<ur_robot_pkg::RobState>("GET/robot_state_srv");
     move2DefPos_service = n.advertiseService("move2_def_pos_srv", &Position_control::move2DefPos, this);
     pos_service = n.advertiseService("move2_pos_srv", &Position_control::position_controller, this);
 
-} 
+}
 
 bool Position_control::position_controller(position_controller_pkg::Tcp_move::Request &req, position_controller_pkg::Tcp_move::Response  &res)
 {
 	// Only for viewving progess in the terminal
-	ROS_INFO("position controller "); 
+	ROS_INFO("position controller ");
     ur_robot_pkg::p2p_cmove::Response response;
     int result = move2Pose(req,response);
 
@@ -55,12 +55,12 @@ bool Position_control::move2DefPos(position_controller_pkg::Pre_def_pose::Reques
        res.succes = SERVICE_NOT_SUCC_COMPLETED;
        return false;
     }
-    
+
     std::vector<double> pos_elements;
 
     while (std::getline(file,str))
-    {  
-       pos_elements.push_back(std::stod(str)); 
+    {
+       pos_elements.push_back(std::stod(str));
     }
     ur_robot_pkg::p2p_cmove srv;
     srv.request.acc = std_acc;
@@ -78,13 +78,13 @@ bool Position_control::move2DefPos(position_controller_pkg::Pre_def_pose::Reques
     bool rob_suc = p2p_service.call(srv);
 
     if (srv.response.succes)
-    {	
+    {
         res.succes = SUCCESS;
         return true;
     }
     res.succes = SERVICE_NOT_SUCC_COMPLETED;
-    return false;    
-     
+    return false;
+
 }
 
 
@@ -137,7 +137,7 @@ int Position_control::getRobState()
 
     if (suc_robStat_call == false)
         return TIMEOUT;
-    
+
     ur_robot_pkg::RobState::Response rob_State = rob_state_srv.response;
     is_conn = rob_State.isConnected;
     is_protec = rob_State.isProtectiveStopped;

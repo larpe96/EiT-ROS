@@ -60,7 +60,6 @@
   <build_export_depend>std_msgs</build_export_depend>
   <build_depend>message_generation</build_depend>
   
-  <build_depend>ur_robot_pkg</build_depend>
   
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>

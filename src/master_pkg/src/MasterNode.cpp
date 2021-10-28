@@ -9,8 +9,8 @@
 MasterNode::MasterNode()
 {
     state = init;
-    
-     
+
+
 } // end masterNode()
 
 /*--------------------------------------------------------------------
@@ -20,7 +20,7 @@ MasterNode::MasterNode()
 
 MasterNode::~MasterNode()
 {
-  
+
 } // end ~masterNode()
 
 bool MasterNode::sendSystemState(master_pkg::system_state_srv::Request  &req,
@@ -33,7 +33,7 @@ bool MasterNode::sendSystemState(master_pkg::system_state_srv::Request  &req,
 
 bool MasterNode::setupNodes()
 {
-  
+
   if (callServiceGripperSetForce(40.0) == 0 )
   {
     return 0;
@@ -81,8 +81,8 @@ int MasterNode::setupServices()
   {
     return 0;
   }
-  
-  
+
+
   //client services
   // pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
   tcp_control_client = n.serviceClient<position_controller_pkg::Tcp_move>("move2_pos_srv");
@@ -92,7 +92,7 @@ int MasterNode::setupServices()
   gripper_grasp_client = n.serviceClient<master_pkg::gripper_Move>("wsg_50_driver/grasp");
   gripper_set_force_client = n.serviceClient<master_pkg::gripper_Conf>("wsg_50_driver/set_force");
 
-  //server services 
+  //server services
   system_state_server = n.advertiseService("system_state", &MasterNode::sendSystemState,this);
   return 1;
 }
@@ -111,7 +111,7 @@ bool MasterNode::callServiceGripperMove(float width,float speed)
 
     if(msg.response.error != 0)
     {
-     ROS_ERROR("Gripper move failed. Error code: %d",msg.response.error); 
+     ROS_ERROR("Gripper move failed. Error code: %d",msg.response.error);
      return 0;
     }
     else
@@ -133,7 +133,7 @@ bool MasterNode::callServiceGripperGrasp(float width,float speed)
 
     if(msg.response.error != 0)
     {
-     ROS_ERROR("Gripper grasp failed. Error code: %d",msg.response.error); 
+     ROS_ERROR("Gripper grasp failed. Error code: %d",msg.response.error);
      return 0;
     }
    return 1;
@@ -151,7 +151,7 @@ bool MasterNode::callServiceGripperSetForce(float force)
 
     if(msg.response.error != 0)
     {
-     ROS_ERROR("Gripper set force failed. Error code: %d",msg.response.error); 
+     ROS_ERROR("Gripper set force failed. Error code: %d",msg.response.error);
      return 0;
     }
     return 1;
@@ -168,7 +168,7 @@ int MasterNode::callServicePoseEstimate()
           {
             return 2;
           }
-        else 
+        else
         {
           obj_pose = msg.response.rel_object_poses.poses[0];
           return 1;
@@ -195,8 +195,8 @@ bool MasterNode::callServiceTcpMove()
 
     if (msg.response.succes != 1)
     {
-      
-      ROS_ERROR("Robot could not move. Error code: %ld",msg.response.succes); 
+
+      ROS_ERROR("Robot could not move. Error code: %ld",msg.response.succes);
       return 0;
     }
     else
@@ -219,8 +219,8 @@ bool MasterNode::callServicePreMove(std::string pose_name)
 
     if (msg.response.succes != 1)
     {
-      
-      ROS_ERROR("Robot could not move. Error code: %d",msg.response.succes); 
+
+      ROS_ERROR("Robot could not move. Error code: %d",msg.response.succes);
       return 0;
     }
     else
@@ -238,7 +238,7 @@ void MasterNode::stateLoop()
 {
   switch(state) {
   case  init:
-       
+
     if (setupServices())
     {
 
@@ -248,17 +248,17 @@ void MasterNode::stateLoop()
       }
       else
       {
-        state = callServicePreMove(home_pos_index) ? get_pose : error;
+        state = callServicePreMove(home_pose_name) ? get_pose : error;
       }
-      
+
     }
     break;
   case  get_pose:
     {
-      int res = 1;// callServicePoseEstimate(); 
+      int res = 1;// callServicePoseEstimate();
       if( res == 1 )
       {
-        state = move_to_pose;
+        state = approach_pose;
       }
       else if(res == 0)
       {
@@ -270,21 +270,24 @@ void MasterNode::stateLoop()
       }
       break;
     }
+  case approach_pose:
+    state = callServicePreMove(approach_pose_name) ? move_to_pose : error;
+    break;
   case  move_to_pose:
     //state = callServiceTcpMove() ? grasp_obj : error;
-    state = callServicePreMove("2") ? grasp_obj : error;
+    state = callServicePreMove(grasp_pose_name) ? grasp_obj : error;
     break;
   case  grasp_obj:
     state = callServiceGripperGrasp(22,50) ? move_with_obj : error;
     break;
   case  move_with_obj:
-    state = callServicePreMove(drop_off_pos_index) ? drop_obj : error;
+    state = callServicePreMove(drop_off_pose_name) ? drop_obj : error;
     break;
   case  drop_obj:
     state = callServiceGripperMove(50,100) ? home : error;
     break;
   case  home:
-    state = callServicePreMove(home_pos_index) ? get_pose : error;
+    state = callServicePreMove(home_pose_name) ? get_pose : error;
     break;
   default:
     ROS_ERROR("Master State is in error state");
