@@ -59,6 +59,7 @@ int main(int argc, char** argv)
   // Detector
   cv::Mat img_background = cv::imread("../EiT-ROS/src/pose_estimation/src/background.jpg");
   detector.calibrate_background(img_background);
+  //detector.show_hist(detector.background_histogram);
 
   // Spin
   ros::ServiceServer service = nh.advertiseService("pose_est", estimate_pose);
