@@ -10,6 +10,7 @@
 #include "sensor_msgs/Image.h"
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/PoseArray.h"
+#include "std_srvs/Trigger.h"
 
 #include "pose_estimation/pose_est_srv.h"
 
@@ -29,6 +30,7 @@ enum State
 {
   error,
   init,
+  ready,
   get_pose,
   approach_pose,
   move_to_pose,
@@ -65,6 +67,9 @@ protected:
 
   bool sendSystemState(master_pkg::system_state_srv::Request  &req,
                                 master_pkg::system_state_srv::Response &res);
+  
+  bool initGraspSeq(std_srvs::Trigger::Request  &req,
+                                std_srvs::Trigger::Response &res);
 
   ros::ServiceClient pose_estim_client;
 
@@ -76,11 +81,12 @@ protected:
   ros::ServiceClient tcp_pre_def_control_client;
 
   ros::ServiceServer system_state_server;
+  ros::ServiceServer init_grasp_seq_server;
 
 
   State state = init;
   ros::NodeHandle n;
-  const char *state_name[9] = { "error","init", "get_pose","approach_pose",
+  const char *state_name[10] = { "error","init", "ready", "get_pose","approach_pose",
                             "move_to_pose","grasp_obj", "move_with_obj",
                             "drop_obj", "home"};
 
