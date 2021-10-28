@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   geometry_msgs
   message_generation
+  std_srvs
 )
 
 ################################################
@@ -48,6 +49,7 @@ gripper_Move.srv
  generate_messages(
    DEPENDENCIES
    std_msgs
+   std_srvs
    sensor_msgs
    geometry_msgs
  )

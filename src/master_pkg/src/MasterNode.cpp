@@ -31,6 +31,26 @@ bool MasterNode::sendSystemState(master_pkg::system_state_srv::Request  &req,
   return true;
 }
 
+bool MasterNode::initGraspSeq(std_srvs::Trigger::Request  &req,
+                                std_srvs::Trigger::Response &res)
+{
+  if (state == ready)
+  {
+    state = get_pose;
+    res.success = 1;
+    res.message = "init grasp seq";
+    return true;
+
+  }
+  else
+  {
+    res.success = 0;
+    res.message = "system is running";
+    return true;
+  }
+  
+}
+
 bool MasterNode::setupNodes()
 {
 
@@ -94,6 +114,7 @@ int MasterNode::setupServices()
 
   //server services
   system_state_server = n.advertiseService("system_state", &MasterNode::sendSystemState,this);
+  init_grasp_seq_server = n.advertiseService("init_grasp_seq", &MasterNode::initGraspSeq,this);
   return 1;
 }
 
@@ -248,10 +269,12 @@ void MasterNode::stateLoop()
       }
       else
       {
-        state = callServicePreMove(home_pose_name) ? get_pose : error;
+        state = callServicePreMove(home_pose_name) ? ready : error;
       }
 
     }
+    break;
+  case ready:
     break;
   case  get_pose:
     {
@@ -287,7 +310,7 @@ void MasterNode::stateLoop()
     state = callServiceGripperMove(50,100) ? home : error;
     break;
   case  home:
-    state = callServicePreMove(home_pose_name) ? get_pose : error;
+    state = callServicePreMove(home_pose_name) ? ready : error;
     break;
   default:
     ROS_ERROR("Master State is in error state");
