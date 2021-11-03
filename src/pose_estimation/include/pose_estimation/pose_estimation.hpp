@@ -27,17 +27,18 @@ class PoseEstimation
         cv::Mat img;
         cv::Mat backProj;
         cv::Mat bin_image;
+
         std::vector<cv::Point3f> center_points;
-        float THRESH_BACKPROJ2BIN = 3;
+        float THRESH_BACKPROJ2BIN = 30;
         int channel_numbers[1] = {0};      //Select which channel to use for histogram and backprojection (1 is HUE)
         int num_hist_bin = 180;            //Number of bin in the histogram
         float h_range[2] = { 0.0, 180.0 }; // Range of the channel used for the histogram creation
         const float* channel_ranges[1] = {h_range};
         std::vector<cv::Vec3f> debug_circles; //Stores the complete information about the circles detected in the last image.
         cv::Mat img_masked;
-        cv::Rect mask_rect = cv::Rect(260, 180, 150, 260);
+        cv::Rect mask_rect = cv::Rect(260, 190, 150, 260);
         double f_y = 574.0;
-        double f_x = 574.0; 
-        cv::Mat base_2_camera = cv::Mat::eye(4, 4, CV_64F);
+        double f_x = 574.0;
+        cv::Mat base_2_camera = cv::Mat::eye(4, 4, CV_32F);
 
 };

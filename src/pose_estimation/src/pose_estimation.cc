@@ -103,18 +103,22 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
   //cv::imshow("backproj", backProj);
   cv::imshow("masked", img_masked);
 
+  //cv::GaussianBlur(img_masked, img_masked, cv::Size(3, 3), 0);
+  //cv::imshow("masked blurred", img_masked);
+
+
   // Threshold backprojected image to create a binary mask og the projected image
   cv::threshold(img_masked, bin_image, this->THRESH_BACKPROJ2BIN, 255.0, cv::THRESH_BINARY);
   cv::bitwise_not(bin_image, bin_image);
-
+  cv::imshow("bin img w/o erode", bin_image);
   // Erode binary image
   cv::Mat structuring_element( 3, 3, CV_8U, cv::Scalar(1) );
-  for(int i = 0; i < 2; i++)
+  for(int i = 0; i < 1; i++)
   {
       cv::erode( bin_image, bin_image, structuring_element );
   }
 
-  for(int i = 0; i < 2; i++)
+  for(int i = 0; i < 3; i++)
   {
       cv::dilate(bin_image, bin_image, structuring_element );
   }
@@ -175,27 +179,27 @@ void PoseEstimation::show_hist(cv::MatND hist)
     }
 
   cv::imshow("filtered histogram", imgHistogram);
-  //cv::waitKey(1);
 }
 
 std::vector<cv::Mat> PoseEstimation::convert_2_transforms(std::vector<cv::Point3f> detected_points, double img_w, double img_h)
 {
-  std::vector<cv::Mat> trans_vec; 
+  std::vector<cv::Mat> trans_vec;
     for(int i = 0; i < detected_points.size(); i++)
     {
         cv::Point3f point = detected_points[i]; 
         double x = point.x - img_w/2.0; 
         double y = point.y - img_h/2.0; 
-        cv::Mat temp_cam_2_obj = cv::Mat::eye(4, 4, CV_64F); 
-        double Z = point.z; // depth_img.at<double>(point.y, point.x)/1000;
-        double Y = x * Z/f_y; 
-        double X = y * Z/f_x;
+        cv::Mat temp_cam_2_obj = cv::Mat::eye(4, 4, CV_32F); 
+        double Z = point.z/1000; // depth_img.at<double>(point.y, point.x)/1000;
+        double Y = y * Z/f_y; 
+        double X = x * Z/f_x;
         temp_cam_2_obj.at<double>(0, 3) = X; 
         temp_cam_2_obj.at<double>(1, 3) = Y; 
         temp_cam_2_obj.at<double>(2, 3) = Z; 
+
         trans_vec.push_back(base_2_camera * temp_cam_2_obj);
     }
-    return trans_vec; 
+    return trans_vec;
 }
 
 
@@ -218,4 +222,3 @@ std::vector<cv::Point3f> PoseEstimation::find_center_points(cv::Mat &edge_img, c
     }
     return centerPoints;
 }
-
