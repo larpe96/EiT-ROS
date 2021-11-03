@@ -69,13 +69,11 @@ int MasterNode::setupServices()
 {
   int setupBool = 1;
 
-  //Wait for the service
-  // setupBool = ros::service::waitForService("pose_est", 10);
-
-  // if (setupBool == 0)
-  // {
-  //   return 0;
-  // }
+  setupBool = ros::service::waitForService("pose_est", 10);
+  if (setupBool == 0)
+  {
+    return 0;
+   }
   setupBool = ros::service::waitForService("move2_pos_srv", 10);
   if (setupBool == 0)
   {
@@ -104,7 +102,7 @@ int MasterNode::setupServices()
 
 
   //client services
-  // pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
+  pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
   tcp_control_client = n.serviceClient<position_controller_pkg::Tcp_move>("move2_pos_srv");
   tcp_pre_def_control_client = n.serviceClient<position_controller_pkg::Pre_def_pose>("move2_def_pos_srv");
 
@@ -202,11 +200,11 @@ int MasterNode::callServicePoseEstimate()
     }
 
 }
-bool MasterNode::callServiceTcpMove()
+bool MasterNode::callServiceTcpMove(geometry_msgs::Pose TCP_pose)
 {
     position_controller_pkg::Tcp_move msg;
 
-    msg.request.pose = obj_pose;
+    msg.request.pose = TCP_pose;
 
     if(!tcp_control_client.call(msg))
     {
@@ -278,14 +276,15 @@ void MasterNode::stateLoop()
     break;
   case  get_pose:
     {
-      int res = 1;// callServicePoseEstimate();
+      int res = 0;
+      res = callServicePoseEstimate();
       if( res == 1 )
       {
         state = approach_pose;
       }
       else if(res == 0)
       {
-        state = error;
+        state = get_pose;
       }
       else
       {
@@ -294,11 +293,28 @@ void MasterNode::stateLoop()
       break;
     }
   case approach_pose:
-    state = callServicePreMove(approach_pose_name) ? move_to_pose : error;
-    break;
+    {
+      int res = 0;
+      obj_pose.orientation.x = -0.97;
+      obj_pose.orientation.y = -0.237;
+      obj_pose.orientation.z = 0.0;
+      obj_pose.orientation.w = 0.02;
+      geometry_msgs::Pose tcp_pose = obj_pose;
+      tcp_pose.position.z = tcp_pose.position.z + 0.1;
+      res = callServiceTcpMove(tcp_pose);
+      if (res == 1)
+      {
+        state = move_to_pose;
+      }
+      else
+      {
+        state = error;
+      }
+      break;
+    }
+
   case  move_to_pose:
-    //state = callServiceTcpMove() ? grasp_obj : error;
-    state = callServicePreMove(grasp_pose_name) ? grasp_obj : error;
+    state = callServiceTcpMove(obj_pose) ? grasp_obj : error;
     break;
   case  grasp_obj:
     state = callServiceGripperGrasp(22,50) ? move_with_obj : error;
