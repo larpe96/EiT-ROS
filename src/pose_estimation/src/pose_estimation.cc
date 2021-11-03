@@ -44,7 +44,7 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
       cv::erode( bin_image, bin_image, structuring_element );
   }
 
-  for(int i = 0; i < 6; i++)
+  for(int i = 0; i < 3; i++)
   {
       cv::dilate(bin_image, bin_image, structuring_element );
   }
@@ -115,13 +115,14 @@ std::vector<cv::Mat> PoseEstimation::convert_2_transforms(std::vector<cv::Point2
         cv::Point2f point = detected_points[i];
         double x = point.x - img_w/2.0;
         double y = point.y - img_h/2.0;
-        cv::Mat temp_cam_2_obj = cv::Mat::eye(4, 4, CV_64F);
-        double Z = depth_img.at<double>(point.y, point.x)/1000;
-        double Y = x * Z/f_y;
-        double X = y * Z/f_x;
-        temp_cam_2_obj.at<double>(0, 3) = X;
-        temp_cam_2_obj.at<double>(1, 3) = Y;
-        temp_cam_2_obj.at<double>(2, 3) = Z;
+        cv::Mat temp_cam_2_obj = cv::Mat::eye(4, 4, CV_32F);
+        std::cout << "Z: " << depth_img.at<_Float32>(point.y, point.x) << std::endl;
+        _Float32 Z = depth_img.at<_Float32>(point.y, point.x)/1000.0;
+        _Float32 Y = y * Z/f_y;
+        _Float32 X = x * Z/f_x;
+        temp_cam_2_obj.at<_Float32>(0, 3) = X;
+        temp_cam_2_obj.at<_Float32>(1, 3) = Y;
+        temp_cam_2_obj.at<_Float32>(2, 3) = Z;
         trans_vec.push_back(base_2_camera * temp_cam_2_obj);
     }
     return trans_vec;
@@ -131,8 +132,8 @@ std::vector<cv::Point2f> PoseEstimation::find_center_points(cv::Mat &edge_img)
 {
     std::vector<cv::Vec3f> circles;
     std::vector<cv::Point2f> centerPoints;
-    //cv::HoughCircles(edge_img, circles, cv::HOUGH_GRADIENT, 1, edge_img.rows/16, 5, 5, 5, 40);
-
+    cv::HoughCircles(edge_img, circles, cv::HOUGH_GRADIENT, 1, edge_img.rows/16, 5, 5, 5, 40);
+/*
     cv::RNG rng(12345);
     int thresh = 100;
     cv::Mat canny_output;
@@ -148,6 +149,7 @@ std::vector<cv::Point2f> PoseEstimation::find_center_points(cv::Mat &edge_img)
         drawContours( drawing, contours, (int)i, color, 2, cv::LINE_8, hierarchy, 0 );
     }
     imshow( "Contours", drawing );
+    */
     cv::Mat tmp_img;
     cv::cvtColor(edge_img, tmp_img, cv::COLOR_GRAY2BGR);
     drawCircles(tmp_img, circles, cv::Scalar(255, 255, 0), 3);
