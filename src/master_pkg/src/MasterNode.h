@@ -54,7 +54,7 @@ public:
 
 protected:
   int callServicePoseEstimate();
-  bool callServiceTcpMove();
+  bool callServiceTcpMove(geometry_msgs::Pose);
   bool callServiceGripperMove(float width,float speed);
   bool callServiceGripperGrasp(float width,float speed);
   bool callServiceGripperSetForce(float force);
