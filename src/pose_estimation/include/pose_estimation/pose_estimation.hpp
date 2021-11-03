@@ -9,14 +9,16 @@ class PoseEstimation
 {
     public:
         PoseEstimation();
+        double findMedian(std::vector<_Float32> a, int n);
+        std::vector<_Float32> depth_within_perimeter(std::vector<cv::Vec3f>  circles, cv::Mat &depth_img);
         std::vector<cv::Mat> Detect(cv::Mat &img, cv::Mat &depth_img);
         void calibrate_background(cv::Mat &background_img);
         void backprojectHistogram(cv::Mat &img);
         void detect_circles(cv::Mat &img);
-        std::vector<cv::Point2f> find_center_points(cv::Mat &edge_img);
+        std::vector<cv::Point3f> find_center_points(cv::Mat &edge_img, cv::Mat &depth_img);
         cv::Mat apply_mask(cv::Mat img);
         void show_hist(cv::MatND hist);
-        std::vector<cv::Mat> convert_2_transforms(std::vector<cv::Point2f> detected_points, cv::Mat depth_img, double img_w, double img_h); 
+        std::vector<cv::Mat> convert_2_transforms(std::vector<cv::Point3f> detected_points, double img_w, double img_h); 
         void drawCircles(cv::Mat &img, std::vector<cv::Vec3f> circles, cv::Scalar color, int radius);
 
         cv::MatND background_histogram;
@@ -25,7 +27,7 @@ class PoseEstimation
         cv::Mat img;
         cv::Mat backProj;
         cv::Mat bin_image;
-        std::vector<cv::Point2f> center_points;
+        std::vector<cv::Point3f> center_points;
         float THRESH_BACKPROJ2BIN = 3;
         int channel_numbers[1] = {0};      //Select which channel to use for histogram and backprojection (1 is HUE)
         int num_hist_bin = 180;            //Number of bin in the histogram
