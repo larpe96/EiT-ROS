@@ -11,7 +11,7 @@ from scipy.spatial.transform import Rotation as R
 import numpy as np
 import time
 
-from ur_robot_pkg.srv import p2p_cmove, jointQs, RobState, CurrTCPPose
+from ur_robot_pkg.srv import p2p_cmove, jointQs, RobState, CurrTCPPose, set_TCP_offset, get_TCP_offset
 
 
 class Robot(RTDEControl, RTDEReceive, RTDEIO):
@@ -76,6 +76,19 @@ class Robot(RTDEControl, RTDEReceive, RTDEIO):
         else:
             return False, "Was not able to disable free drive"
 
+
+    def cb_set_TCP_offset(self, req):
+        off_pos = req.offset.position
+        off_ori = req.offset.orientation
+        off_rotvec = R.from_quat([off_ori.x, off_ori.y, off_ori.z, off_ori.w]).as_rotvec()
+        offset = [off_pos.x, off_pos.y, off_pos.z, off_rotvec[0], off_rotvec[1], off_rotvec[2]]
+        b_succes = self.setTcp(offset)
+        if b_succes:
+            return b_succes, "TCP Offset changed"
+        else:
+            return b_succes, "Unable to change TCP Offset"
+        
+
 class Servicenode(Robot):
     def __init__(self, _ip):
         self.robot = Robot(_ip)
@@ -90,6 +103,7 @@ class Servicenode(Robot):
         srv_jointQ = rospy.Service("GET/jointQ_srv", jointQs, self.robot.cb_get_joint_state)
         srv_rob_state = rospy.Service("GET/robot_state_srv", RobState, self.robot.cb_get_RobState)
         srv_Tcp_pose = rospy.Service("GET/tcp_pose_srv", CurrTCPPose, self.robot.cb_get_TCP_Pose)
+        srv_set_TCP_offset = rospy.Service("SET/tcp_offset_srv", set_TCP_offset, self.robot.cb_set_TCP_offset)
         rospy.spin()
 
 
