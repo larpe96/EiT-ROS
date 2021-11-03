@@ -29,10 +29,14 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
   //cv::imshow("backproj", backProj);
   cv::imshow("masked", img_masked);
 
+  //cv::GaussianBlur(img_masked, img_masked, cv::Size(3, 3), 0);
+  //cv::imshow("masked blurred", img_masked);
+
+
   // Threshold backprojected image to create a binary mask og the projected image
   cv::threshold(img_masked, bin_image, this->THRESH_BACKPROJ2BIN, 255.0, cv::THRESH_BINARY);
   cv::bitwise_not(bin_image, bin_image);
-
+  cv::imshow("bin img w/o erode", bin_image);
   // Erode binary image
   cv::Mat structuring_element( 3, 3, CV_8U, cv::Scalar(1) );
   for(int i = 0; i < 2; i++)
@@ -40,7 +44,7 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
       cv::erode( bin_image, bin_image, structuring_element );
   }
 
-  for(int i = 0; i < 2; i++)
+  for(int i = 0; i < 6; i++)
   {
       cv::dilate(bin_image, bin_image, structuring_element );
   }
@@ -101,40 +105,54 @@ void PoseEstimation::show_hist(cv::MatND hist)
     }
 
   cv::imshow("filtered histogram", imgHistogram);
-  //cv::waitKey(1);
 }
 
 std::vector<cv::Mat> PoseEstimation::convert_2_transforms(std::vector<cv::Point2f> detected_points, cv::Mat depth_img, double img_w, double img_h)
 {
-  std::vector<cv::Mat> trans_vec; 
+  std::vector<cv::Mat> trans_vec;
     for(int i = 0; i < detected_points.size(); i++)
     {
-        cv::Point2f point = detected_points[i]; 
-        double x = point.x - img_w/2.0; 
-        double y = point.y - img_h/2.0; 
-        cv::Mat temp_cam_2_obj = cv::Mat::eye(4, 4, CV_64F); 
+        cv::Point2f point = detected_points[i];
+        double x = point.x - img_w/2.0;
+        double y = point.y - img_h/2.0;
+        cv::Mat temp_cam_2_obj = cv::Mat::eye(4, 4, CV_64F);
         double Z = depth_img.at<double>(point.y, point.x)/1000;
-        double Y = x * Z/f_y; 
+        double Y = x * Z/f_y;
         double X = y * Z/f_x;
-        temp_cam_2_obj.at<double>(0, 3) = X; 
-        temp_cam_2_obj.at<double>(1, 3) = Y; 
-        temp_cam_2_obj.at<double>(2, 3) = Z; 
+        temp_cam_2_obj.at<double>(0, 3) = X;
+        temp_cam_2_obj.at<double>(1, 3) = Y;
+        temp_cam_2_obj.at<double>(2, 3) = Z;
         trans_vec.push_back(base_2_camera * temp_cam_2_obj);
     }
-    return trans_vec; 
+    return trans_vec;
 }
-
 
 std::vector<cv::Point2f> PoseEstimation::find_center_points(cv::Mat &edge_img)
 {
     std::vector<cv::Vec3f> circles;
     std::vector<cv::Point2f> centerPoints;
-    cv::HoughCircles(edge_img, circles, cv::HOUGH_GRADIENT, 1, edge_img.rows/16, 80, 15, 10, 30);
-    cv::Mat tmp_img; 
-    cv::cvtColor(edge_img, tmp_img, cv::COLOR_GRAY2BGR); 
+    //cv::HoughCircles(edge_img, circles, cv::HOUGH_GRADIENT, 1, edge_img.rows/16, 5, 5, 5, 40);
+
+    cv::RNG rng(12345);
+    int thresh = 100;
+    cv::Mat canny_output;
+    cv::Canny( edge_img, canny_output, thresh, thresh*2 );
+
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+    findContours( canny_output, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE );
+    cv::Mat drawing = cv::Mat::zeros( canny_output.size(), CV_8UC3 );
+    for( size_t i = 0; i< contours.size(); i++ )
+    {
+        cv::Scalar color = cv::Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
+        drawContours( drawing, contours, (int)i, color, 2, cv::LINE_8, hierarchy, 0 );
+    }
+    imshow( "Contours", drawing );
+    cv::Mat tmp_img;
+    cv::cvtColor(edge_img, tmp_img, cv::COLOR_GRAY2BGR);
     drawCircles(tmp_img, circles, cv::Scalar(255, 255, 0), 3);
-    
-    cv::imshow("edge_img circles", tmp_img); 
+
+    cv::imshow("edge_img circles", tmp_img);
 
     this->debug_circles = circles;
     for( size_t i = 0; i < circles.size(); i++ )

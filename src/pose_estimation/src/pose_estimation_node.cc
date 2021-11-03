@@ -12,7 +12,7 @@
 
 PoseEstimation detector;
 cv::Mat img;
-cv::Mat img_depth; 
+cv::Mat img_depth;
 
 void getQuaternion(cv::Mat R, double Q[])
 {
@@ -49,7 +49,6 @@ void OnImage(const sensor_msgs::ImageConstPtr& img_msg, const sensor_msgs::Image
 	cv_bridge::CvImagePtr cv_ptr;
 	cv_bridge::CvImagePtr cv_ptr_depth;
 
-	
 	try
 	{
 		cv_ptr = cv_bridge::toCvCopy(img_msg, sensor_msgs::image_encodings::BGR8);
@@ -60,9 +59,10 @@ void OnImage(const sensor_msgs::ImageConstPtr& img_msg, const sensor_msgs::Image
 		ROS_ERROR("cv_bridge exception: %s", e.what());
 	}
 	img = cv_ptr->image;
-	cv::imshow("onimage", img);
-  	cv::waitKey(1);
 	img_depth = cv_ptr_depth->image;
+	cv::imshow("rgb", img);
+	cv::imshow("depth", img_depth);
+  	cv::waitKey(1);
 }
 
 bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
@@ -77,7 +77,7 @@ bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
 	for(int i = 0; i < object_points.size(); i++)
 	{
 		cv::Mat tmp_trans = object_points[i];
-		double quat[4]; 
+		double quat[4];
 		getQuaternion(tmp_trans(cv::Rect(0,0,3,3)), quat);
 
 		geometry_msgs::Pose p;
@@ -111,9 +111,9 @@ int main(int argc, char** argv)
   sync.registerCallback(boost::bind(&OnImage, _1, _2));
 
   // Detector
-  cv::Mat img_background = cv::imread("../EiT-ROS/src/pose_estimation/src/background.jpg");
+  cv::Mat img_background = cv::imread("/home/mdn/bor/EiT-ROS/src/pose_estimation/src/background2.png"); //background.jpg");
   detector.calibrate_background(img_background);
-  //detector.show_hist(detector.background_histogram);
+  detector.show_hist(detector.background_histogram);
 
   // Spin
   ros::ServiceServer service = nh.advertiseService("pose_est", estimate_pose);
