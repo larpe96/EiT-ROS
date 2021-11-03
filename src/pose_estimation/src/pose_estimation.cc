@@ -3,7 +3,7 @@
 PoseEstimation::PoseEstimation()
 {}
 
-double PoseEstimation::findMedian(std::vector<_Float32> a, int n)
+float PoseEstimation::findMedian(std::vector<float> a, int n)
 {
     if(n == 1)
     {
@@ -26,7 +26,7 @@ double PoseEstimation::findMedian(std::vector<_Float32> a, int n)
 
         // Find the average of value at
         // index N/2 and (N-1)/2
-        return (_Float32)(a[(n - 1) / 2]
+        return (float)(a[(n - 1) / 2]
                         + a[n / 2])
                / 2.0;
     }
@@ -42,13 +42,13 @@ double PoseEstimation::findMedian(std::vector<_Float32> a, int n)
 
         // Value at index (N/2)th
         // is the median
-        return (_Float32)a[n / 2];
+        return (float)a[n / 2];
     }
 }
 
-std::vector<_Float32> PoseEstimation::depth_within_perimeter(std::vector<cv::Vec3f>  circles, cv::Mat &depth_img)
+std::vector<float> PoseEstimation::depth_within_perimeter(std::vector<cv::Vec3f>  circles, cv::Mat &depth_img)
 {
-    std::vector<_Float32> depth;
+    std::vector<float> depth;
     for(int i = 0; i < circles.size(); i++)
     {
         cv::Mat background = cv::Mat::zeros(cv::Size(depth_img.cols, depth_img.rows), CV_8U);
@@ -58,13 +58,12 @@ std::vector<_Float32> PoseEstimation::depth_within_perimeter(std::vector<cv::Vec
         std::vector<std::vector<cv::Point> > contours;
         std::vector<cv::Vec4i> hierarchy;
         cv::findContours( background, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE );
-        std::vector<_Float32> tmp_depth;
+        std::vector<float> tmp_depth;
         cv::imshow("debug", background);
-        cv::waitKey(0);
         std::cout << contours[0].size() << std::endl;
         for(int i = 0; i < contours[0].size(); i++)
         {
-            _Float32 depth_i = depth_img.at<_Float32>(contours[0][i].y, contours[0][i].x);
+            float depth_i = depth_img.at<float>(contours[0][i].y, contours[0][i].x);
             if(depth_i == 0)
                 continue;
             tmp_depth.push_back(depth_i);
@@ -118,7 +117,7 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
       cv::erode( bin_image, bin_image, structuring_element );
   }
 
-  for(int i = 0; i < 3; i++)
+  for(int i = 0; i < 4; i++)
   {
       cv::dilate(bin_image, bin_image, structuring_element );
   }
@@ -181,39 +180,39 @@ void PoseEstimation::show_hist(cv::MatND hist)
   cv::imshow("filtered histogram", imgHistogram);
 }
 
-std::vector<cv::Mat> PoseEstimation::convert_2_transforms(std::vector<cv::Point3f> detected_points, double img_w, double img_h)
+std::vector<cv::Mat> PoseEstimation::convert_2_transforms(std::vector<cv::Point3f> detected_points, float img_w, float img_h)
 {
   std::vector<cv::Mat> trans_vec;
     for(int i = 0; i < detected_points.size(); i++)
     {
-        cv::Point3f point = detected_points[i]; 
-        double x = point.x - img_w/2.0; 
-        double y = point.y - img_h/2.0; 
-        cv::Mat temp_cam_2_obj = cv::Mat::eye(4, 4, CV_32F); 
-        double Z = point.z/1000; // depth_img.at<double>(point.y, point.x)/1000;
-        double Y = y * Z/f_y; 
-        double X = x * Z/f_x;
-        temp_cam_2_obj.at<double>(0, 3) = X; 
-        temp_cam_2_obj.at<double>(1, 3) = Y; 
-        temp_cam_2_obj.at<double>(2, 3) = Z; 
+        cv::Point3f point = detected_points[i];
+        float x = point.x - img_w/2.0;
+        float y = point.y - img_h/2.0;
+        cv::Mat temp_cam_2_obj = cv::Mat::eye(4, 4, CV_32F);
 
-        trans_vec.push_back(base_2_camera * temp_cam_2_obj);
+        float Z = point.z/1000; // depth_img.at<float>(point.y, point.x)/1000;
+        float Y = y * Z/f_y;
+        float X = x * Z/f_x;
+        temp_cam_2_obj.at<float>(0, 3) = X;
+        temp_cam_2_obj.at<float>(1, 3) = Y;
+        temp_cam_2_obj.at<float>(2, 3) = Z;
+
+        trans_vec.push_back((temp_cam_2_obj.inv() * camera2base).inv());
     }
     return trans_vec;
 }
-
 
 std::vector<cv::Point3f> PoseEstimation::find_center_points(cv::Mat &edge_img, cv::Mat &depth_img)
 {
     std::vector<cv::Vec3f> circles;
     std::vector<cv::Point3f> centerPoints;
-    cv::HoughCircles(edge_img, circles, cv::HOUGH_GRADIENT, 1, edge_img.rows/16, 80, 15, 10, 30);
-    cv::Mat tmp_img; 
-    cv::cvtColor(edge_img, tmp_img, cv::COLOR_GRAY2BGR); 
+    cv::HoughCircles(edge_img, circles, cv::HOUGH_GRADIENT, 1, edge_img.rows/16, 10, 10, 10, 50);
+    cv::Mat tmp_img;
+    cv::cvtColor(edge_img, tmp_img, cv::COLOR_GRAY2BGR);
     drawCircles(tmp_img, circles, cv::Scalar(255, 255, 0), 3);
-    
-    cv::imshow("edge_img circles", tmp_img); 
-    std::vector<_Float32> depth = depth_within_perimeter(circles, depth_img); 
+
+    cv::imshow("edge_img circles", tmp_img);
+    std::vector<float> depth = depth_within_perimeter(circles, depth_img);
     this->debug_circles = circles;
     for( size_t i = 0; i < circles.size(); i++ )
     {

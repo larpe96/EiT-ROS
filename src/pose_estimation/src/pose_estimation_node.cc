@@ -14,33 +14,33 @@ PoseEstimation detector;
 cv::Mat img;
 cv::Mat img_depth;
 
-void getQuaternion(cv::Mat R, _Float32 Q[])
+void getQuaternion(cv::Mat R, float Q[])
 {
-    _Float32 trace = R.at<_Float32>(0,0) + R.at<_Float32>(1,1) + R.at<_Float32>(2,2);
+    float trace = R.at<float>(0,0) + R.at<float>(1,1) + R.at<float>(2,2);
  
     if (trace > 0.0) 
     {
-        _Float32 s = sqrt(trace + 1.0);
+        float s = sqrt(trace + 1.0);
         Q[3] = (s * 0.5);
         s = 0.5 / s;
-        Q[0] = ((R.at<_Float32>(2,1) - R.at<_Float32>(1,2)) * s);
-        Q[1] = ((R.at<_Float32>(0,2) - R.at<_Float32>(2,0)) * s);
-        Q[2] = ((R.at<_Float32>(1,0) - R.at<_Float32>(0,1)) * s);
+        Q[0] = ((R.at<float>(2,1) - R.at<float>(1,2)) * s);
+        Q[1] = ((R.at<float>(0,2) - R.at<float>(2,0)) * s);
+        Q[2] = ((R.at<float>(1,0) - R.at<float>(0,1)) * s);
     } 
     
     else 
     {
-        int i = R.at<_Float32>(0,0) < R.at<_Float32>(1,1) ? (R.at<_Float32>(1,1) < R.at<_Float32>(2,2) ? 2 : 1) : (R.at<_Float32>(0,0) < R.at<_Float32>(2,2) ? 2 : 0); 
+        int i = R.at<float>(0,0) < R.at<float>(1,1) ? (R.at<float>(1,1) < R.at<float>(2,2) ? 2 : 1) : (R.at<float>(0,0) < R.at<float>(2,2) ? 2 : 0); 
         int j = (i + 1) % 3;  
         int k = (i + 2) % 3;
 
-        _Float32 s = sqrt(R.at<_Float32>(i, i) - R.at<_Float32>(j,j) - R.at<_Float32>(k,k) + 1.0);
+        float s = sqrt(R.at<float>(i, i) - R.at<float>(j,j) - R.at<float>(k,k) + 1.0);
         Q[i] = s * 0.5;
         s = 0.5 / s;
 
-        Q[3] = (R.at<_Float32>(k,j) - R.at<_Float32>(j,k)) * s;
-        Q[j] = (R.at<_Float32>(j,i) + R.at<_Float32>(i,j)) * s;
-        Q[k] = (R.at<_Float32>(k,i) + R.at<_Float32>(i,k)) * s;
+        Q[3] = (R.at<float>(k,j) - R.at<float>(j,k)) * s;
+        Q[j] = (R.at<float>(j,i) + R.at<float>(i,j)) * s;
+        Q[k] = (R.at<float>(k,i) + R.at<float>(i,k)) * s;
     }
 }
 
@@ -77,13 +77,13 @@ bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
 	for(int i = 0; i < object_points.size(); i++)
 	{
 		cv::Mat tmp_trans = object_points[i];
-		_Float32 quat[4];
+		float quat[4];
 		getQuaternion(tmp_trans(cv::Rect(0,0,3,3)), quat);
 
 		geometry_msgs::Pose p;
-		p.position.x = tmp_trans.at<_Float32>(0, 3);
-		p.position.y = tmp_trans.at<_Float32>(1, 3);
-		p.position.z = tmp_trans.at<_Float32>(2, 3);
+		p.position.x = tmp_trans.at<float>(0, 3);
+		p.position.y = tmp_trans.at<float>(1, 3);
+		p.position.z = tmp_trans.at<float>(2, 3);
     	p.orientation.x = quat[0];
 		p.orientation.y = quat[1];
 		p.orientation.z = quat[2];
