@@ -52,7 +52,7 @@ void OnImage(const sensor_msgs::ImageConstPtr& img_msg, const sensor_msgs::Image
 	try
 	{
 		cv_ptr = cv_bridge::toCvCopy(img_msg, sensor_msgs::image_encodings::BGR8);
-		cv_ptr_depth = cv_bridge::toCvCopy(img_depth_msg, sensor_msgs::image_encodings::TYPE_16UC1);
+		cv_ptr_depth = cv_bridge::toCvCopy(img_depth_msg, sensor_msgs::image_encodings::TYPE_32FC1);
 	}
 	catch (cv_bridge::Exception& e)
 	{
