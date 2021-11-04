@@ -112,7 +112,7 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
   cv::imshow("bin img w/o erode", bin_image);
   // Erode binary image
   cv::Mat structuring_element( 3, 3, CV_8U, cv::Scalar(1) );
-  for(int i = 0; i < 1; i++)
+  for(int i = 0; i < 3; i++)
   {
       cv::erode( bin_image, bin_image, structuring_element );
   }

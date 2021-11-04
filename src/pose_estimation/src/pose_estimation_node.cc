@@ -17,8 +17,8 @@ cv::Mat img_depth;
 void getQuaternion(cv::Mat R, float Q[])
 {
     float trace = R.at<float>(0,0) + R.at<float>(1,1) + R.at<float>(2,2);
- 
-    if (trace > 0.0) 
+
+    if (trace > 0.0)
     {
         float s = sqrt(trace + 1.0);
         Q[3] = (s * 0.5);
@@ -26,12 +26,12 @@ void getQuaternion(cv::Mat R, float Q[])
         Q[0] = ((R.at<float>(2,1) - R.at<float>(1,2)) * s);
         Q[1] = ((R.at<float>(0,2) - R.at<float>(2,0)) * s);
         Q[2] = ((R.at<float>(1,0) - R.at<float>(0,1)) * s);
-    } 
-    
-    else 
+    }
+
+    else
     {
-        int i = R.at<float>(0,0) < R.at<float>(1,1) ? (R.at<float>(1,1) < R.at<float>(2,2) ? 2 : 1) : (R.at<float>(0,0) < R.at<float>(2,2) ? 2 : 0); 
-        int j = (i + 1) % 3;  
+        int i = R.at<float>(0,0) < R.at<float>(1,1) ? (R.at<float>(1,1) < R.at<float>(2,2) ? 2 : 1) : (R.at<float>(0,0) < R.at<float>(2,2) ? 2 : 0);
+        int j = (i + 1) % 3;
         int k = (i + 2) % 3;
 
         float s = sqrt(R.at<float>(i, i) - R.at<float>(j,j) - R.at<float>(k,k) + 1.0);
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
   sync.registerCallback(boost::bind(&OnImage, _1, _2));
 
   // Detector
-  cv::Mat img_background = cv::imread("/home/mdn/bor/EiT-ROS/src/pose_estimation/src/background3.png"); //background.jpg");
+  cv::Mat img_background = cv::imread("/home/user/workspace/src/pose_estimation/src/background3.png"); //background.jpg");
   detector.calibrate_background(img_background);
   detector.show_hist(detector.background_histogram);
 

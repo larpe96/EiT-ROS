@@ -48,7 +48,7 @@ bool MasterNode::initGraspSeq(std_srvs::Trigger::Request  &req,
     res.message = "system is running";
     return true;
   }
-  
+
 }
 
 bool MasterNode::setupNodes()
@@ -59,10 +59,12 @@ bool MasterNode::setupNodes()
     return 0;
   }
 
-  if (callServiceGripperMove(50, 100) == 0)
+  if (callServiceGripperMove(100, 100) == 0)
   {
     return 0;
   }
+
+
   return 1;
 }
 int MasterNode::setupServices()
@@ -299,6 +301,7 @@ void MasterNode::stateLoop()
       obj_pose.orientation.y = -0.237;
       obj_pose.orientation.z = 0.0;
       obj_pose.orientation.w = 0.02;
+      //obj_pose.position.z = obj_pose.position.z + 0.1;
       geometry_msgs::Pose tcp_pose = obj_pose;
       tcp_pose.position.z = tcp_pose.position.z + 0.1;
       res = callServiceTcpMove(tcp_pose);
@@ -317,13 +320,34 @@ void MasterNode::stateLoop()
     state = callServiceTcpMove(obj_pose) ? grasp_obj : error;
     break;
   case  grasp_obj:
-    state = callServiceGripperGrasp(22,50) ? move_with_obj : error;
+    state = callServiceGripperGrasp(22,50) ? deproach_pose : error;
     break;
+  case deproach_pose:
+    {
+      int res = 0;
+      obj_pose.orientation.x = -0.97;
+      obj_pose.orientation.y = -0.237;
+      obj_pose.orientation.z = 0.0;
+      obj_pose.orientation.w = 0.02;
+      //obj_pose.position.z = obj_pose.position.z + 0.1;
+      geometry_msgs::Pose tcp_pose = obj_pose;
+      tcp_pose.position.z = tcp_pose.position.z + 0.1;
+      res = callServiceTcpMove(tcp_pose);
+      if (res == 1)
+      {
+        state = move_with_obj;
+      }
+      else
+      {
+        state = error;
+      }
+      break;
+    }
   case  move_with_obj:
     state = callServicePreMove(drop_off_pose_name) ? drop_obj : error;
     break;
   case  drop_obj:
-    state = callServiceGripperMove(50,100) ? home : error;
+    state = callServiceGripperMove(100,100) ? home : error;
     break;
   case  home:
     state = callServicePreMove(home_pose_name) ? ready : error;
