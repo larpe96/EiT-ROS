@@ -90,7 +90,7 @@ bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
 		p.orientation.w = quat[3];
 
 		posearray.poses.push_back(p);
-		std::cout << tmp_trans << std::endl;
+		//std::cout << tmp_trans << std::endl;
 	}
 	res.rel_object_poses = posearray;
 

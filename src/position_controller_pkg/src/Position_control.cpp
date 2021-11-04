@@ -30,11 +30,9 @@ bool Position_control::position_controller(position_controller_pkg::Tcp_move::Re
 {
 	// Only for viewving progess in the terminal
   // Only for viewving progess in the terminal
-	ROS_INFO("position controller ");
   ur_robot_pkg::p2p_cmove::Response response;
   int result = move2Pose(req,response);
   res.succes = result; // We did not return/update/set a response :o
-  ROS_INFO("position controller res: %d", res.succes);
   if (res.succes== SUCCESS)
   {
     return true;

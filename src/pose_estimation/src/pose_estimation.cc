@@ -60,7 +60,7 @@ std::vector<float> PoseEstimation::depth_within_perimeter(std::vector<cv::Vec3f>
         cv::findContours( background, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE );
         std::vector<float> tmp_depth;
         cv::imshow("debug", background);
-        std::cout << contours[0].size() << std::endl;
+        //std::cout << contours[0].size() << std::endl;
         for(int i = 0; i < contours[0].size(); i++)
         {
             float depth_i = depth_img.at<float>(contours[0][i].y, contours[0][i].x);
@@ -70,7 +70,7 @@ std::vector<float> PoseEstimation::depth_within_perimeter(std::vector<cv::Vec3f>
         }
         depth.push_back(findMedian(tmp_depth, tmp_depth.size()));
     }
-    std::cout << depth.size() << std::endl;
+    //std::cout << depth.size() << std::endl;
     return depth;
 
 

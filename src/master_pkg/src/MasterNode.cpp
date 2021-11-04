@@ -320,15 +320,28 @@ void MasterNode::stateLoop()
     state = callServiceTcpMove(obj_pose) ? grasp_obj : error;
     break;
   case  grasp_obj:
-    state = callServiceGripperGrasp(22,50) ? deproach_pose : error;
-    break;
+    {
+      state = error;
+      if (callServiceGripperGrasp(22,50) )
+      {
+        state = deproach_pose;
+      }
+      else 
+      {
+        if (callServiceGripperMove(100,100))
+        {
+          state = callServicePreMove(home_pose_name) ? get_pose : error;
+        }
+      }
+      break;
+    }
   case deproach_pose:
     {
       int res = 0;
-      obj_pose.orientation.x = -0.97;
-      obj_pose.orientation.y = -0.237;
+      obj_pose.orientation.x = 0.17;
+      obj_pose.orientation.y = -0.985;
       obj_pose.orientation.z = 0.0;
-      obj_pose.orientation.w = 0.02;
+      obj_pose.orientation.w = 0.0;
       //obj_pose.position.z = obj_pose.position.z + 0.1;
       geometry_msgs::Pose tcp_pose = obj_pose;
       tcp_pose.position.z = tcp_pose.position.z + 0.1;
