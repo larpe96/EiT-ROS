@@ -9,6 +9,8 @@ project(enviroment_controller_pkg)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  geometry_msgs
+  std_msgs
 )
 
 
@@ -17,7 +19,8 @@ set(SOURCES
   src/Object.cpp
   src/Module.cpp
   src/AssemblyKit.cpp
-  src/EnviromentController.cpp
+  src/EnviromentControllerNode.cpp
+  src/Matrix.cpp
 )
 
 ################################################
@@ -25,13 +28,15 @@ set(SOURCES
 ################################################
 
 ## Generate messages in the 'msg' folder
-add_message_files(FILES gripper_Cmd.msg gripper_Status.msg)
+# add_message_files(
+#   FILES 
+# )
 
 
 ## Generate services in the 'srv' folder
-add_service_files(
-FILES
-)
+# add_service_files(
+# FILES
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -44,10 +49,20 @@ FILES
 ################################################
 
 
- generate_messages(
-   DEPENDENCIES
-   std_msgs
- )
+#  generate_messages(
+#    DEPENDENCIES
+#    std_msgs
+#  )
+
+###################################
+## catkin specific configuration ##
+###################################
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES master_pkg
+#  CATKIN_DEPENDS pose_estimation position_controller_pkg roscpp std_msgs
+#  DEPENDS system_lib
+)
 
 ###########
 ## Build ##
