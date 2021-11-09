@@ -112,9 +112,9 @@ int main(int argc, char** argv)
   sync.registerCallback(boost::bind(&OnImage, _1, _2));
 
   // Detector
-  cv::Mat img_background = cv::imread("/home/user/workspace/src/pose_estimation/src/background3.png"); //background.jpg");
+  cv::Mat img_background = cv::imread("/home/mdn/bor/EiT-ROS/src/pose_estimation/src/backgroundBrown3.png"); //background.jpg");
   detector.calibrate_background(img_background);
-  detector.show_hist(detector.background_histogram);
+  //detector.show_hist(detector.background_histogram);
 
   // Spin
   ros::ServiceServer service = nh.advertiseService("pose_est", estimate_pose);
