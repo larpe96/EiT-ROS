@@ -13,6 +13,7 @@
 PoseEstimation detector;
 cv::Mat img;
 cv::Mat img_depth;
+cv::Mat background;
 
 void getQuaternion(cv::Mat R, float Q[])
 {
@@ -69,7 +70,7 @@ bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
 		                pose_estimation::pose_est_srv::Response  &res)
 {
 	std::vector<cv::Mat> object_points;
-	object_points = detector.Detect(img, img_depth);
+	object_points = detector.Detect(img, img_depth, background);
 
 	geometry_msgs::PoseArray posearray;
 	posearray.header.stamp = ros::Time::now();
@@ -112,8 +113,10 @@ int main(int argc, char** argv)
   sync.registerCallback(boost::bind(&OnImage, _1, _2));
 
   // Detector
-  cv::Mat img_background = cv::imread("/home/mdn/bor/EiT-ROS/src/pose_estimation/src/backgroundBrown3.png"); //background.jpg");
+  cv::Mat img_background = cv::imread("/home/mdn/bor/EiT-ROS/src/pose_estimation/src/backgroundBrown.png"); //background.jpg");
   detector.calibrate_background(img_background);
+  background = cv::imread("background.png");
+  cv::imshow("background", background);
   //detector.show_hist(detector.background_histogram);
 
   // Spin
