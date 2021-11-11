@@ -17,7 +17,7 @@ float PoseEstimation::findMedian(std::vector<float> a, int n)
     if (n % 2 == 0) {
 
         // Applying nth_element
-        // on n/2th index
+        // on n/2th indexf
         nth_element(a.begin(),
                     a.begin() + n / 2,
                     a.end());
@@ -87,106 +87,66 @@ void PoseEstimation::drawCircles(cv::Mat &img, std::vector<cv::Vec3f> circles, c
     }
 }
 
-std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img, cv::Mat &background_img)
+std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img)
 {
 
-  // Copy original image
-  //std::cout << depth_img << std::endl;
-  // Threshold backprojected image to create a binary mask og the projected image
-  //backProj = cv::Mat::zeros(img.cols, img.rows, CV_16S);  
   cv::Mat abs_diff, diff_square, diff_norm, diff_sum;
 
-
-
   cv::absdiff(img_msg, this->background, abs_diff); 
-  std::cout << abs_diff.type() << std::endl;
   diff_square = abs_diff.mul(abs_diff);
-  //std::cout << abs_diff << std::endl;
-  double min, max;
-  cv::minMaxLoc(diff_square, &min, &max);
-  std::cout <<"max: " << max << " min: " << min << std::endl;
-  std::cout << "diff_square type"<< diff_square.type() << std::endl;
-  //cv::transform(diff_square, diff_norm, cv::Mat::ones(1, 1, CV_32FC3));
+
+  // Sum across channels
   cv::Mat bgr[3];   //destination array
   cv::split(abs_diff, bgr);//split source
   diff_sum = bgr[0] + bgr[1] + bgr[2];
 
-  std::cout << "Reaced" << std::endl;
-
+  // Elementswise squareroot.
   cv::sqrt(diff_sum, diff_norm);
-  diff_norm.convertTo(diff_norm, CV_32F);
-  std::cout << diff_norm.type() << "  -  " << CV_32F;
-//   cv::cvtColor(img, img, cv::COLOR_BGR2HSV);
-//   cv::calcBackProject(&img, 1, this->channel_numbers, this->background_histogram, backProj, this->channel_ranges, 255.0);
 
-  // Apply mask
-  //std::cout << diff_norm << std::endl;
   img_masked = apply_mask(diff_norm);
-  //cv::imshow("backproj", backProj);
-  cv::imshow("masked", diff_norm);
-  cv::waitKey(0); 
 
-
-  // Threshold backprojected image to create a binary mask og the projected image
-  backProj = cv::Mat::zeros(img_masked.cols, img_masked.rows, CV_16S);
-  //cv::cvtColor(img_masked, img_masked, cv::COLOR_BGR2HSV);
-  //cv::calcBackProject(&img_masked, 1, this->channel_numbers, this->background_histogram, backProj, this->channel_ranges, 255.0);
-  //cv::imshow("backproj", backProj);
+//  cv::imshow("masked", img_masked);
+//  cv::waitKey(0);
 
   // Threshold back projected image to create a binary mask og the projected image
   cv::threshold(img_masked, bin_image, this->THRESH_BACKPROJ2BIN, 255.0, cv::THRESH_BINARY);
 
-  // Flip back projection and mask again
-  //cv::bitwise_not(bin_image, bin_image);
+//  cv::imshow("bin", bin_image);
+//  cv::waitKey(0);
+
   bin_image = apply_mask(bin_image);
-  cv::imshow("binary", bin_image);
+  //cv::imshow("binary", bin_image);
 
-  //cv::GaussianBlur(img_masked, img_masked, cv::Size(3, 3), 0);
-  //cv::imshow("masked blurred", img_masked);
 
-  // Erode binary image
   cv::Mat structuring_element( 3, 3, CV_8U, cv::Scalar(1) );
-  //cv::getStructuringElement(cv::MORPH_CROSS,(3,3));
-  //cv::Mat structuring_element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(3,3));
-  for(int i = 0; i < 0; i++)
+
+  for(int i = 0; i < 2; i++)
   {
       cv::dilate(bin_image, bin_image, structuring_element );
   }
+
   cv::imshow("Erode & dilate", bin_image);
 
-  for(int i = 0; i < 3; i++)
+  for(int i = 0; i < 2; i++)
   {
       cv::erode( bin_image, bin_image, structuring_element );
   }
 
-  for(int i = 0; i < 7; i++)
-  {
-      cv::dilate(bin_image, bin_image, structuring_element );
-  }
-  cv::imshow("Erode & dilate", bin_image);
+  bin_image.convertTo(bin_image, CV_8U);
 
   // Filter roated_rect -> convert to Point3f representing xyz.
 
   // Find contours
   std::vector<std::vector<cv::Point>> contours;
-  findContours( bin_image, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+  cv::findContours( bin_image, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
   // Find median depth on filled contours
   std::vector<float> depth = depth_within_perimeter(contours, depth_img);
 
-  // Find rotated rects
-  std::vector<cv::RotatedRect> rot_rect = find_rotated_rects(contours);
-
-  for (int i = 0; i < rot_rect.size(); i++)
-  {
-    csv_file << id << "," << rot_rect[i].center.x <<"," <<  rot_rect[i].center.y << "," << rot_rect[i].angle << "," << rot_rect[i].size.width << "," << rot_rect[i].size.height << std::endl;
-  }
-
-  csv_file.close();
-
   cv::RNG rng(12345);
   std::vector<cv::RotatedRect> minRect( contours.size() );
   std::vector<cv::RotatedRect> minEllipse( contours.size() );
+
   for( size_t i = 0; i < contours.size(); i++ )
   {
       minRect[i] = cv::minAreaRect( contours[i] );
@@ -195,7 +155,8 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
           minEllipse[i] = cv::fitEllipse( contours[i] );
       }
   }
-  cv::Mat drawing = cv::Mat::zeros( img.size(), CV_8UC3 );
+  cv::Mat drawing = cv::Mat::zeros( img_msg.size(), CV_8UC3 );
+
   for( size_t i = 0; i< contours.size(); i++ )
   {
       cv::Scalar color = cv::Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
@@ -208,10 +169,11 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
       minRect[i].points( rect_points );
       for ( int j = 0; j < 4; j++ )
       {
-          line( drawing, rect_points[j], rect_points[(j+1)%4], color );
+          cv::line( drawing, rect_points[j], rect_points[(j+1)%4], color );
       }
   }
-  imshow( "Contours", drawing );
+//  cv::imshow( "Contours", drawing );
+//  cv::waitKey(0);
   //center_points = find_rotated_rects(bin_image, depth_img);
   std::vector<cv::Mat> object_trans = convert_2_transforms(minRect, depth, img_msg.cols, img_msg.rows);
 
@@ -293,15 +255,4 @@ std::vector<cv::Mat> PoseEstimation::convert_2_transforms(std::vector<cv::Rotate
         //trans_vec.push_back(temp_cam_2_obj);
     }
     return trans_vec;
-}
-
-std::vector<cv::RotatedRect> PoseEstimation::find_rotated_rects(std::vector<std::vector<cv::Point>> contours)
-{
-    std::vector<cv::RotatedRect> rot_rect;
-    for(int i = 0; i < contours.size(); i++)
-    {
-        rot_rect.push_back(cv::minAreaRect(contours[i]));
-    }
-
-    return rot_rect;
 }

@@ -11,11 +11,10 @@ class PoseEstimation
         PoseEstimation();
         float findMedian(std::vector<float> a, int n);
         std::vector<float> depth_within_perimeter(std::vector<std::vector<cv::Point>> contours, cv::Mat &depth_img);
-        std::vector<cv::Mat> Detect(cv::Mat &img, cv::Mat &depth_img, cv::Mat &background_img);
+        std::vector<cv::Mat> Detect(cv::Mat &img, cv::Mat &depth_img);
         void calibrate_background(cv::Mat &background_img);
         void backprojectHistogram(cv::Mat &img);
         void detect_circles(cv::Mat &img);
-        std::vector<cv::RotatedRect> find_rotated_rects(  std::vector<std::vector<cv::Point>> contours);
         cv::Mat apply_mask(cv::Mat img);
         void show_hist(cv::MatND hist);
         std::vector<cv::Mat> convert_2_transforms(std::vector<cv::RotatedRect> rot_rect, std::vector<float> depth, float img_w, float img_h);
@@ -30,7 +29,7 @@ class PoseEstimation
         cv::Mat background;
 
         std::vector<cv::Point3f> center_points;
-        float THRESH_BACKPROJ2BIN = 10;
+        float THRESH_BACKPROJ2BIN = 18;
         int channel_numbers[1] = {0};      //Select which channel to use for histogram and backprojection (1 is HUE)
         int num_hist_bin = 180;            //Number of bin in the histogram
         float h_range[2] = { 0.0, 180.0 }; // Range of the channel used for the histogram creation
