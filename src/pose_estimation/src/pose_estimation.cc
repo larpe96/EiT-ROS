@@ -90,20 +90,38 @@ void PoseEstimation::drawCircles(cv::Mat &img, std::vector<cv::Vec3f> circles, c
 
 std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img)
 {
+
   // Copy original image
-  img_msg.copyTo(img);
   //std::cout << depth_img << std::endl;
   // Threshold backprojected image to create a binary mask og the projected image
   //backProj = cv::Mat::zeros(img.cols, img.rows, CV_16S);  
-  cv::Mat abs_diff, diff_square, diff_norm;   
-  cv::absdiff(img_msg, this->background, abs_diff); 
-  diff_square = diff_square.mul(diff_square); 
-  cv::transform(diff_square, diff_norm, cv::Matx13f(1,1,1));
+  cv::Mat abs_diff, diff_square, diff_norm, diff_sum;
 
+
+
+  cv::absdiff(img_msg, this->background, abs_diff); 
+  std::cout << abs_diff.type() << std::endl;
+  diff_square = abs_diff.mul(abs_diff);
+  //std::cout << abs_diff << std::endl;
+  double min, max;
+  cv::minMaxLoc(diff_square, &min, &max);
+  std::cout <<"max: " << max << " min: " << min << std::endl;
+  std::cout << "diff_square type"<< diff_square.type() << std::endl;
+  //cv::transform(diff_square, diff_norm, cv::Mat::ones(1, 1, CV_32FC3));
+  cv::Mat bgr[3];   //destination array
+  cv::split(abs_diff, bgr);//split source
+  diff_sum = bgr[0] + bgr[1] + bgr[2];
+
+  std::cout << "Reaced" << std::endl;
+
+  cv::sqrt(diff_sum, diff_norm);
+  diff_norm.convertTo(diff_norm, CV_32F);
+  std::cout << diff_norm.type() << "  -  " << CV_32F;
 //   cv::cvtColor(img, img, cv::COLOR_BGR2HSV);
 //   cv::calcBackProject(&img, 1, this->channel_numbers, this->background_histogram, backProj, this->channel_ranges, 255.0);
 
   // Apply mask
+  //std::cout << diff_norm << std::endl;
   img_masked = apply_mask(diff_norm);
   //cv::imshow("backproj", backProj);
   cv::imshow("masked", diff_norm);
