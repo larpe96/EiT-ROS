@@ -27,6 +27,7 @@ class PoseEstimation
         cv::Mat img;
         cv::Mat backProj;
         cv::Mat bin_image;
+        cv::Mat background;
 
         std::vector<cv::Point3f> center_points;
         float THRESH_BACKPROJ2BIN = 30;

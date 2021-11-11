@@ -8,12 +8,14 @@ find_package(OpenCV REQUIRED)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include_directories(
+        ../../include/pose_estimation
+        ../../src)
 
 set(project_sources
-    main.cpp
-   ../../include pose_estimation/pose_estimation.hpp
+   ../../include/pose_estimation/pose_estimation.hpp
    ../../src/pose_estimation.cc
 )
 
-add_executable(TEST_DETECTOR ${project_sources})
+add_executable(TEST_DETECTOR main.cpp ${project_sources})
 target_link_libraries(TEST_DETECTOR PRIVATE ${OpenCV_LIBS})

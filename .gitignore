@@ -143,4 +143,6 @@ src/pose_estimation/.vscode/settings.json
 
 .catkin_tools/
 /logs
-src/pose_estimation/Test/build-TEST_DETECTOR-Desktop-Debug/
+
+src/pose_estimation/TEST/build-TEST_DETECTOR-Desktop-Debug/
+src/pose_estimation/TEST/TEST_DETECTOR/CMakeLists.txt.user

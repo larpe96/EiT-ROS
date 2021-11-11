@@ -1,4 +1,5 @@
-#include <pose_estimation/pose_estimation.hpp>
+//#include <pose_estimation/pose_estimation.hpp>
+#include <pose_estimation.hpp>
 
 PoseEstimation::PoseEstimation()
 {}
@@ -97,7 +98,7 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
   cv::Mat abs_diff, diff_square, diff_norm;   
   cv::absdiff(img_msg, this->background, abs_diff); 
   diff_square = diff_square.mul(diff_square); 
-  cv::transform(diff_square, diff_norm, cv::Matx13f(1,1,1))  
+  cv::transform(diff_square, diff_norm, cv::Matx13f(1,1,1));
 
 //   cv::cvtColor(img, img, cv::COLOR_BGR2HSV);
 //   cv::calcBackProject(&img, 1, this->channel_numbers, this->background_histogram, backProj, this->channel_ranges, 255.0);
