@@ -10,15 +10,15 @@ class PoseEstimation
     public:
         PoseEstimation();
         float findMedian(std::vector<float> a, int n);
-        std::vector<float> depth_within_perimeter(std::vector<cv::Vec3f>  circles, cv::Mat &depth_img);
-        std::vector<cv::Mat> Detect(cv::Mat &img, cv::Mat &depth_img);
+        std::vector<float> depth_within_perimeter(std::vector<std::vector<cv::Point>> contours, cv::Mat &depth_img);
+        std::vector<cv::Mat> Detect(cv::Mat &img, cv::Mat &depth_img, cv::Mat &background_img);
         void calibrate_background(cv::Mat &background_img);
         void backprojectHistogram(cv::Mat &img);
         void detect_circles(cv::Mat &img);
-        std::vector<cv::Point3f> find_center_points(cv::Mat &edge_img, cv::Mat &depth_img);
+        std::vector<cv::RotatedRect> find_rotated_rects(  std::vector<std::vector<cv::Point>> contours);
         cv::Mat apply_mask(cv::Mat img);
         void show_hist(cv::MatND hist);
-        std::vector<cv::Mat> convert_2_transforms(std::vector<cv::Point3f> detected_points, float img_w, float img_h);
+        std::vector<cv::Mat> convert_2_transforms(std::vector<cv::RotatedRect> rot_rect, std::vector<float> depth, float img_w, float img_h);
         void drawCircles(cv::Mat &img, std::vector<cv::Vec3f> circles, cv::Scalar color, int radius);
 
         cv::MatND background_histogram;
@@ -30,19 +30,23 @@ class PoseEstimation
         cv::Mat background;
 
         std::vector<cv::Point3f> center_points;
-        float THRESH_BACKPROJ2BIN = 30;
+        float THRESH_BACKPROJ2BIN = 10;
         int channel_numbers[1] = {0};      //Select which channel to use for histogram and backprojection (1 is HUE)
         int num_hist_bin = 180;            //Number of bin in the histogram
         float h_range[2] = { 0.0, 180.0 }; // Range of the channel used for the histogram creation
         const float* channel_ranges[1] = {h_range};
         std::vector<cv::Vec3f> debug_circles; //Stores the complete information about the circles detected in the last image.
         cv::Mat img_masked;
-        cv::Rect mask_rect = cv::Rect(260, 190, 150, 200);
+        cv::Rect mask_rect = cv::Rect(235, 220, 285, 145);
         float f_y = 574.0;
         float f_x = 574.0;
-        cv::Mat camera2base = (cv::Mat_<float>(4,4) << 0.9185597569776569, 0.3952687376858392, 0.003255436897067616, 0.1873098683840868,
-                                                      0.3733054066454857, -0.8647527818998914, -0.3359251398238113, -0.4018687658297423,
-                                                     -0.1299655578620582, 0.3097825869939143, -0.9418830620437771, 0.7924941900212179,
-                                                      0,0,0,1 ); //cv::Mat::eye(4, 4, CV_32F);
+        cv::Mat camera2base = (cv::Mat_<float>(4,4) << -0.4092872843859879, 0.9119913122596123, -0.02749118409475548, 0.4613890083554278,
+ 0.9118304765329119, 0.4099132124339962, 0.02315902281622022, -0.396963379231898,
+ 0.03238982719471067, -0.01558860593609109, -0.9993537384026068, 0.5628008106183637,
+ 0, 0, 0, 1);
 
+        cv::Mat base2camera = (cv::Mat_<float>(4,4) << -0.3200615474180835, 0.906443881953242, 0.2755360134971088, 0.5131311099627459,
+                                                        0.9247229143918688, 0.3621450629584728, -0.1172112834731024, -0.2413966376231433,
+                                                        -0.2060294577553179, 0.2172796406577029, -0.9541181374927892, 0.5905108421276393,
+                                                        0, 0, 0, 1);
 };

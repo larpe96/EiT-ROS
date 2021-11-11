@@ -24,7 +24,7 @@
 #define home_pose_name  "pose_2"
 #define grasp_pose_name "pose_0"
 #define approach_pose_name "pose_1"
-#define drop_off_pose_name "pose_3"
+#define drop_off_pose_name "pose_6"
 
 enum State
 {
@@ -35,6 +35,7 @@ enum State
   approach_pose,
   move_to_pose,
   grasp_obj,
+  deproach_pose,
   move_with_obj,
   drop_obj,
   home
@@ -54,7 +55,7 @@ public:
 
 protected:
   int callServicePoseEstimate();
-  bool callServiceTcpMove();
+  bool callServiceTcpMove(geometry_msgs::Pose);
   bool callServiceGripperMove(float width,float speed);
   bool callServiceGripperGrasp(float width,float speed);
   bool callServiceGripperSetForce(float force);
@@ -86,8 +87,8 @@ protected:
 
   State state = init;
   ros::NodeHandle n;
-  const char *state_name[10] = { "error","init", "ready", "get_pose","approach_pose",
-                            "move_to_pose","grasp_obj", "move_with_obj",
+  const char *state_name[11] = { "error","init", "ready", "get_pose","approach_pose",
+                            "move_to_pose","grasp_obj", "deproach_pose","move_with_obj",
                             "drop_obj", "home"};
 
   geometry_msgs::Pose obj_pose;

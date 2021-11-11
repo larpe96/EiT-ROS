@@ -11,7 +11,7 @@ from scipy.spatial.transform import Rotation as R
 import numpy as np
 import time
 
-from ur_robot_pkg.srv import p2p_cmove, jointQs, RobState, CurrTCPPose, set_TCP_offset, get_TCP_offset
+from ur_robot_pkg.srv import p2p_cmove, jointQs, RobState, CurrTCPPose, set_TCP_offset
 
 
 class Robot(RTDEControl, RTDEReceive, RTDEIO):
