@@ -1,4 +1,4 @@
-#include <pose_estimation/pose_estimation.hpp>
+#include <pose_estimation.hpp>
 #include "pose_estimation/pose_est_srv.h"
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
@@ -70,7 +70,7 @@ bool estimate_pose(pose_estimation::pose_est_srv::Request   &req,
 		                pose_estimation::pose_est_srv::Response  &res)
 {
 	std::vector<cv::Mat> object_points;
-	object_points = detector.Detect(img, img_depth, background);
+	object_points = detector.Detect(img, img_depth);
 
 	geometry_msgs::PoseArray posearray;
 	posearray.header.stamp = ros::Time::now();
