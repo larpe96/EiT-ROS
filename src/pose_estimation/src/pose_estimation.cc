@@ -93,14 +93,20 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
   img_msg.copyTo(img);
   //std::cout << depth_img << std::endl;
   // Threshold backprojected image to create a binary mask og the projected image
-  backProj = cv::Mat::zeros(img.cols, img.rows, CV_16S);
-  cv::cvtColor(img, img, cv::COLOR_BGR2HSV);
-  cv::calcBackProject(&img, 1, this->channel_numbers, this->background_histogram, backProj, this->channel_ranges, 255.0);
+  //backProj = cv::Mat::zeros(img.cols, img.rows, CV_16S);  
+  cv::Mat abs_diff, diff_square, diff_norm;   
+  cv::absdiff(img_msg, this->background, abs_diff); 
+  diff_square = diff_square.mul(diff_square); 
+  cv::transform(diff_square, diff_norm, cv::Matx13f(1,1,1))  
+
+//   cv::cvtColor(img, img, cv::COLOR_BGR2HSV);
+//   cv::calcBackProject(&img, 1, this->channel_numbers, this->background_histogram, backProj, this->channel_ranges, 255.0);
 
   // Apply mask
-  img_masked = apply_mask(backProj);
+  img_masked = apply_mask(diff_norm);
   //cv::imshow("backproj", backProj);
-  cv::imshow("masked", img_masked);
+  cv::imshow("masked", diff_norm);
+  cv::waitKey(0); 
 
   //cv::GaussianBlur(img_masked, img_masked, cv::Size(3, 3), 0);
   //cv::imshow("masked blurred", img_masked);
@@ -142,21 +148,22 @@ cv::Mat PoseEstimation::apply_mask(cv::Mat img)
 
 void PoseEstimation::calibrate_background(cv::Mat &background_img)
 {
-    // Convert image to HSV color space
-    cv::Mat background_img_HSV;
-    cv::cvtColor(background_img, background_img_HSV, cv::COLOR_BGR2HSV);
-    cv::calcHist (&background_img_HSV, 1, this->channel_numbers, cv::Mat(),
-    this->background_histogram, 1, &this->num_hist_bin, this->channel_ranges);
+    this->background = background_img; 
+    // // Convert image to HSV color space
+    // cv::Mat background_img_HSV;
+    // cv::cvtColor(background_img, background_img_HSV, cv::COLOR_BGR2HSV);
+    // cv::calcHist (&background_img_HSV, 1, this->channel_numbers, cv::Mat(),
+    // this->background_histogram, 1, &this->num_hist_bin, this->channel_ranges);
 
-    // Apply moving average on histogram
-    cv::Mat kernel_ma(3,1, CV_32F);
-    kernel_ma.at<float>(0,0) =  1.0f;
-    kernel_ma.at<float>(0,1) =  1.0f;
-    kernel_ma.at<float>(0,2) =  1.0f;
-    cv::filter2D(this->background_histogram, this->background_histogram, -1, kernel_ma);
+    // // Apply moving average on histogram
+    // cv::Mat kernel_ma(3,1, CV_32F);
+    // kernel_ma.at<float>(0,0) =  1.0f;
+    // kernel_ma.at<float>(0,1) =  1.0f;
+    // kernel_ma.at<float>(0,2) =  1.0f;
+    // cv::filter2D(this->background_histogram, this->background_histogram, -1, kernel_ma);
 
-    // Normalize histogram
-    cv::normalize ( this->background_histogram, this->background_histogram, 1.0);
+    // // Normalize histogram
+    // cv::normalize ( this->background_histogram, this->background_histogram, 1.0);
 }
 
 void PoseEstimation::show_hist(cv::MatND hist)

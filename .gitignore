@@ -143,3 +143,4 @@ src/pose_estimation/.vscode/settings.json
 
 .catkin_tools/
 /logs
+src/pose_estimation/Test/build-TEST_DETECTOR-Desktop-Debug/
