@@ -8,19 +8,16 @@ Module::Module(/* args */)
 Module::Module(Object _obj, TMatrix _motherFrame, TMatrix _motherGripFrame )
 {
     object = _obj;
-    objectInModule = false;
+    object_in_module = false;
     size = 1;
-    motherFrame = _motherFrame;
-    gripMother = _motherGripFrame;
 }
 
-Module::Module(Object _obj, TMatrix _motherFrame, Occu_pos _oc_pos)
+Module::Module(Object _obj, TMatrix _motherFrame, Pose _oc_pos)
 {
     object = _obj;
-    objectInModule = false;
+    object_in_module = false;
     size = 1;
-    occuPos.push_back(_oc_pos);
-    mountFrame.setTranslation(_oc_pos.x*step_size, _oc_pos.y*step_size, 0.10);
+    poses.push_back(_oc_pos);
 }
 
 Module::~Module()
@@ -29,25 +26,16 @@ Module::~Module()
 
 int Module::getSize()
 {
-    return size;
+    return poses.size();
 }
 
-void Module::setOccuPoses(std::vector<Occu_pos> _vec)
+void Module::setOccupiedPoses(std::vector<Pose> _vec)
 {
-    occuPos = _vec;
-    Occu_pos _oc_pos = occuPos.at(0);
-    mountFrame.setTranslation(_oc_pos.x*step_size, _oc_pos.y*step_size, 0.10);
+    poses = _vec;
+    Pose _oc_pos = poses.at(0);
 }
 
-std::vector<Occu_pos> Module::getOccuPoses()
+std::vector<Pose> Module::getOccupiedPoses()
 {
-    return occuPos;
-}
-
-geometry_msgs::Pose Module::getPlacePose()
-{
-    TMatrix rel2World = (motherFrame*mountFrame*gripMother).inverse();
-    std::cout<<"rel2World\n";
-    rel2World.print();
-    return rel2World.getPose();
+    return poses;
 }

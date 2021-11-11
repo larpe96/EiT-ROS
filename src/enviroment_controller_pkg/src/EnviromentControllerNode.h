@@ -21,10 +21,10 @@ public:
 
   //! Destructor.
   ~EnviromentControllerNode();
-
+  geometry_msgs::Point convert_kit_to_base_pose(geometry_msgs::Point);
 protected:
 
-AssemblyKit assemKit;
+AssemblyKit assembly_kit;
 ros::NodeHandle n;
 
 

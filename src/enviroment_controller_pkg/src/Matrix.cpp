@@ -84,14 +84,6 @@ RMatrix::~RMatrix()
 
 
 
-
-
-
-
-
-
-
-
 TMatrix::TMatrix(/* args */)
 {
     eye();
