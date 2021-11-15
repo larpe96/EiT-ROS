@@ -2,5 +2,7 @@
   <node name="pose_estimation" pkg="pose_estimation" type="pose_estimation_node" output="screen" respawn="true"></node>
 
   <include file="$(find openni2_launch)/launch/openni2.launch"></include>
+    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" respawn="true"></node>
+
 
 </launch>
