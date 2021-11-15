@@ -53,9 +53,6 @@ class PoseEstimation
     ros::NodeHandle nh_;
     /// ROS service
     ros::ServiceServer service_;
-    /// ROS subscriber sync policy
-    //typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> MySyncPolicy;
-
     using CameraSyncPolicy = message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image>;
     using CameraSynchronizer = message_filters::Synchronizer<CameraSyncPolicy>;
     std::shared_ptr<CameraSynchronizer> camera_sync_;
@@ -98,12 +95,12 @@ class PoseEstimation
     std::vector<float> depth;
     std::vector<cv::RotatedRect> rot_rects;
     cv::RNG rng;
-    std::vector<cv::Mat> object_trans;
+    //std::vector<cv::Mat> object_trans;
     // Apply mask
-    cv::Mat masked;
-    cv::Rect mask_rect;
+    //cv::Mat masked;
+    //cv::Rect mask_rect;
     // Depth within parameter
-    cv::Mat filledImage;
+    //cv::Mat filledImage;
     // Convert to transforms
     float f_y = 574.0;
     float f_x = 574.0;
@@ -112,16 +109,4 @@ class PoseEstimation
                                                     0.03238982719471067, -0.01558860593609109, -0.9993537384026068, 0.5628008106183637,
                                                     0, 0, 0, 1);
     bool service_started = false;
-
-/*
-    cv::Mat backProj;
-    std::vector<cv::Point3f> center_points;
-    float THRESH_BACKPROJ2BIN = 10;
-    int channel_numbers[1] = {0};      //Select which channel to use for histogram and backprojection (1 is HUE)
-    int num_hist_bin = 180;            //Number of bin in the histogram
-    float h_range[2] = { 0.0, 180.0 }; // Range of the channel used for the histogram creation
-    const float* channel_ranges[1] = {h_range};
-    std::vector<cv::Vec3f> debug_circles; //Stores the complete information about the circles detected in the last image.
-*/
-
 };
