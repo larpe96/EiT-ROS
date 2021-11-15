@@ -89,7 +89,7 @@ void PoseEstimation::drawCircles(cv::Mat &img, std::vector<cv::Vec3f> circles, c
 
 std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img)
 {
-
+  img_msg.convertTo(img_msg, CV_32FC3);
   cv::Mat abs_diff, diff_square, diff_norm, diff_sum;
 
   cv::absdiff(img_msg, this->background, abs_diff); 
@@ -120,14 +120,14 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
 
   cv::Mat structuring_element( 3, 3, CV_8U, cv::Scalar(1) );
 
-  for(int i = 0; i < 2; i++)
+  for(int i = 0; i < 1; i++)
   {
       cv::dilate(bin_image, bin_image, structuring_element );
   }
 
   cv::imshow("Erode & dilate", bin_image);
 
-  for(int i = 0; i < 2; i++)
+  for(int i = 0; i < 1; i++)
   {
       cv::erode( bin_image, bin_image, structuring_element );
   }
@@ -155,7 +155,8 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
           minEllipse[i] = cv::fitEllipse( contours[i] );
       }
   }
-  cv::Mat drawing = cv::Mat::zeros( img_msg.size(), CV_8UC3 );
+  cv::Mat drawing = img_msg.clone(); //cv::Mat::zeros( img_msg.size(), CV_8UC3 );
+  drawing.convertTo(drawing, CV_8UC3);
 
   for( size_t i = 0; i< contours.size(); i++ )
   {
@@ -172,7 +173,7 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
           cv::line( drawing, rect_points[j], rect_points[(j+1)%4], color );
       }
   }
-//  cv::imshow( "Contours", drawing );
+  cv::imshow( "Contours", drawing );
 //  cv::waitKey(0);
   //center_points = find_rotated_rects(bin_image, depth_img);
   std::vector<cv::Mat> object_trans = convert_2_transforms(minRect, depth, img_msg.cols, img_msg.rows);
@@ -192,6 +193,7 @@ cv::Mat PoseEstimation::apply_mask(cv::Mat img)
 void PoseEstimation::calibrate_background(cv::Mat &background_img)
 {
     this->background = background_img; 
+    this->background.convertTo(this->background, CV_32FC3);
     // // Convert image to HSV color space
     // cv::Mat background_img_HSV;
     // cv::cvtColor(background_img, background_img_HSV, cv::COLOR_BGR2HSV);
