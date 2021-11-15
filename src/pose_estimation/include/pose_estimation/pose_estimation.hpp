@@ -29,7 +29,7 @@ class PoseEstimation
         cv::Mat background;
 
         std::vector<cv::Point3f> center_points;
-        float THRESH_BACKPROJ2BIN = 10;
+        float THRESH_BACKPROJ2BIN = 10; //10
         int channel_numbers[1] = {0};      //Select which channel to use for histogram and backprojection (1 is HUE)
         int num_hist_bin = 180;            //Number of bin in the histogram
         float h_range[2] = { 0.0, 180.0 }; // Range of the channel used for the histogram creation
@@ -39,9 +39,9 @@ class PoseEstimation
         cv::Rect mask_rect = cv::Rect(1, 1, 620, 470);
         float f_y = 574.0;
         float f_x = 574.0;
-        cv::Mat camera2base = (cv::Mat_<float>(4,4) << -0.4092872843859879, 0.9119913122596123, -0.02749118409475548, 0.4613890083554278,
- 0.9118304765329119, 0.4099132124339962, 0.02315902281622022, -0.396963379231898,
- 0.03238982719471067, -0.01558860593609109, -0.9993537384026068, 0.5628008106183637,
+        cv::Mat camera2base = (cv::Mat_<float>(4,4) << -0.4239851138500654, 0.9055161821251454, -0.01664533397227496, 0.464894891647513,
+ 0.9036243510870013, 0.424190730960022, 0.05937386538029141, -0.4129218758926164,
+ 0.06082479228194684, 0.01013250596365761, -0.9980970278318407, 0.5500317523427357,
  0, 0, 0, 1);
 
         cv::Mat base2camera = (cv::Mat_<float>(4,4) << -0.3200615474180835, 0.906443881953242, 0.2755360134971088, 0.5131311099627459,

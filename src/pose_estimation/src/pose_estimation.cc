@@ -89,6 +89,8 @@ void PoseEstimation::drawCircles(cv::Mat &img, std::vector<cv::Vec3f> circles, c
 
 std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img)
 {
+  
+  
   img_msg.convertTo(img_msg, CV_32FC3);
   cv::Mat abs_diff, diff_square, diff_norm, diff_sum;
 
@@ -103,27 +105,17 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
   // Elementswise squareroot.
   cv::sqrt(diff_sum, diff_norm);
 
+  diff_norm.convertTo(diff_norm, CV_8UC1);
+  cv::imshow("diff_norm", diff_norm);
+
   img_masked = apply_mask(diff_norm);
 
-//  cv::imshow("masked", img_masked);
-//  cv::waitKey(0);
-
+  cv::imshow("masked", img_masked);
+  
   // Threshold back projected image to create a binary mask og the projected image
   cv::threshold(img_masked, bin_image, this->THRESH_BACKPROJ2BIN, 255.0, cv::THRESH_BINARY);
 
-//  cv::imshow("bin", bin_image);
-//  cv::waitKey(0);
-
-  bin_image = apply_mask(bin_image);
-  //cv::imshow("binary", bin_image);
-
-
   cv::Mat structuring_element( 3, 3, CV_8U, cv::Scalar(1) );
-
-  for(int i = 0; i < 1; i++)
-  {
-      cv::dilate(bin_image, bin_image, structuring_element );
-  }
 
   cv::imshow("Erode & dilate", bin_image);
 
@@ -132,13 +124,30 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
       cv::erode( bin_image, bin_image, structuring_element );
   }
 
+  for(int i = 0; i < 1; i++)
+  {
+      cv::dilate(bin_image, bin_image, structuring_element );
+  }
+
   bin_image.convertTo(bin_image, CV_8U);
 
   // Filter roated_rect -> convert to Point3f representing xyz.
 
   // Find contours
   std::vector<std::vector<cv::Point>> contours;
-  cv::findContours( bin_image, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+  std::vector<std::vector<cv::Point>> init_contours;
+  cv::findContours( bin_image, init_contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+  //cv::findContours( bin_image, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+
+  cv::Mat filledImage = cv::Mat::zeros(img_msg.rows, img_msg.cols, CV_8UC1);
+  //cv::fillPoly(filledImage, init_contours, cv::Scalar(255));
+  for (int i = 0; i < (int)init_contours.size(); i++)
+  {
+    cv::drawContours( filledImage, init_contours, i, cv::Scalar(255) , CV_FILLED);    
+  }
+  cv::findContours( filledImage, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+  
+  cv::imshow("filled image", filledImage);
 
   // Find median depth on filled contours
   std::vector<float> depth = depth_within_perimeter(contours, depth_img);
@@ -163,6 +172,7 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
       cv::Scalar color = cv::Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
       // contour
       cv::drawContours( drawing, contours, (int)i, color );
+      //cv::drawContours( drawing, contours, (int)i, color , CV_FILLED);    
       // ellipse
       cv::ellipse( drawing, minEllipse[i], color, 2 );
       // rotated rectangle

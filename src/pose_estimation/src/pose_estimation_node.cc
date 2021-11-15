@@ -113,7 +113,7 @@ int main(int argc, char** argv)
   sync.registerCallback(boost::bind(&OnImage, _1, _2));
 
   // Detector
-  cv::Mat img_background = cv::imread("/home/user/EiT-ROS/src/pose_estimation/TEST/TEST_DETECTOR/background.jpg"); //background.jpg");
+  cv::Mat img_background = cv::imread("/home/user/workspace/src/pose_estimation/TEST/TEST_DETECTOR/background.jpg"); //background.jpg");
   detector.calibrate_background(img_background);
 //   background = cv::imread("background.png");
  cv::imshow("background", img_background);
