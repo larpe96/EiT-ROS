@@ -24,7 +24,7 @@
 #define home_pose_name  "pose_2"
 #define grasp_pose_name "pose_0"
 #define approach_pose_name "pose_1"
-#define drop_off_pose_name "pose_6"
+#define drop_off_pose_name "pose_99"
 
 enum State
 {
