@@ -4,7 +4,7 @@ from std_srvs.srv import Trigger
 from geometry_msgs.msg import Pose
 from ur_robot_pkg.srv import CurrTCPPose
 
-PREFIX = "pose_"
+PREFIX = "cali_"
 
 if __name__ == "__main__":
     rospy.init_node("SetPoses")
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     get_tcp = rospy.ServiceProxy("GET/tcp_pose_srv", CurrTCPPose)
     enabl_freeDrive = rospy.ServiceProxy("SET/enable_teach", Trigger)
     disabl_freeDrive = rospy.ServiceProxy("SET/disable_teach", Trigger)
-    i =0
+    i =99
     answer = 'y'
     while(answer != "n"):
         res_en = enabl_freeDrive()
