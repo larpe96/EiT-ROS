@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -98,11 +99,10 @@ generate_messages(
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
 ##     and list every .cfg file to be processed
 
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+# Generate dynamic reconfigure parameters in the 'cfg' folder
+generate_dynamic_reconfigure_options(
+  cfg/PoseEstimation.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -117,7 +117,8 @@ catkin_package(
    INCLUDE_DIRS include
   LIBRARIES pose_estimation
   CATKIN_DEPENDS
-    roscpp # OpenCV cv_bridge geometry_msgs image_transport message_generation roscpp sensor_msgs std_msgs
+    roscpp
+    dynamic_reconfigure # OpenCV cv_bridge geometry_msgs image_transport message_generation roscpp sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -146,7 +147,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/pose_estimation_node.cpp)
-
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 add_executable(${PROJECT_NAME}_node src/pose_estimation_node.cc)
 target_link_libraries(pose_estimation_node pose_estimation ${catkin_LIBRARIES})
 

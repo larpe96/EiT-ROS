@@ -4,10 +4,10 @@
 #include <ctime>
 #include <fstream>
 
-PoseEstimation::PoseEstimation()
+PoseEstimation::PoseEstimation(): nh_("~"), dynamic_reconfigure_server_(nh_)
 {}
 
-float PoseEstimation::findMedian(std::vector<float> a, int n)
+void PoseEstimation::Initialize(const ros::NodeHandle& nh)
 {
     if(n == 1)
     {
@@ -50,7 +50,7 @@ float PoseEstimation::findMedian(std::vector<float> a, int n)
     }
 }
 
-std::vector<float> PoseEstimation::depth_within_perimeter(std::vector<std::vector<cv::Point>> contours, cv::Mat &depth_img)
+void PoseEstimation::OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, const sensor_msgs::ImageConstPtr& img_depth_msg)
 {
   std::vector<float> depth;
 //  std::cout << contours[0] << std::endl;
@@ -131,8 +131,9 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
 
   bin_image.convertTo(bin_image, CV_8U);
 
-  // Filter roated_rect -> convert to Point3f representing xyz.
 
+std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth, cv::Mat &img_binary)
+{
   // Find contours
   std::vector<std::vector<cv::Point>> contours;
   std::vector<std::vector<cv::Point>> init_contours;
@@ -191,16 +192,8 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_msg, cv::Mat &depth_img
   return object_trans;
 }
 
-cv::Mat PoseEstimation::apply_mask(cv::Mat img)
-{
-  cv::Mat masked;
-  cv::Mat mask = cv::Mat::zeros(img.size().height, img.size().width, CV_8U);
-  mask(mask_rect) = 255;
-  img.copyTo(masked, mask);
-  return masked;
-}
 
-void PoseEstimation::calibrate_background(cv::Mat &background_img)
+void PoseEstimation::getQuaternion(cv::Mat R, float Q[])
 {
     this->background = background_img; 
     this->background.convertTo(this->background, CV_32FC3);
@@ -221,50 +214,28 @@ void PoseEstimation::calibrate_background(cv::Mat &background_img)
     // cv::normalize ( this->background_histogram, this->background_histogram, 1.0);
 }
 
-void PoseEstimation::show_hist(cv::MatND hist)
-{
-    //create an 8 bits single channel image to hold the histogram
-    //paint it white
-    cv::Mat imgHistogram = cv::Mat(cv::Size(num_hist_bin, 50), CV_8UC3, cv::Scalar(0,0,0));
-    cv::rectangle(imgHistogram, cv::Point(0,0), cv::Point(256,50), CV_RGB(255,255,255), -1);
-    float value;
-    int normalized;
-
-    //draw the histogram
-    for(int i=0; i < num_hist_bin; i++)
+    if (trace > 0.0)
     {
-            //value = cv::QueryHistValue_1D( this->background_histogram, i);
-            value = hist.at<float>(0,i);
-            normalized = cvRound(value*50/h_range[1]);
-            cv::line(imgHistogram, cv::Point(i,50), cv::Point(i,50-normalized), CV_RGB(0,0,0));
+        float s = sqrt(trace + 1.0);
+        Q[3] = (s * 0.5);
+        s = 0.5 / s;
+        Q[0] = ((R.at<float>(2,1) - R.at<float>(1,2)) * s);
+        Q[1] = ((R.at<float>(0,2) - R.at<float>(2,0)) * s);
+        Q[2] = ((R.at<float>(1,0) - R.at<float>(0,1)) * s);
     }
 
-  cv::imshow("filtered histogram", imgHistogram);
-}
-
-std::vector<cv::Mat> PoseEstimation::convert_2_transforms(std::vector<cv::RotatedRect> rot_rect, std::vector<float> depth, float img_w, float img_h)
-{
-
-  std::vector<cv::Mat> trans_vec;
-    for(int i = 0; i < rot_rect.size(); i++)
+    else
     {
-        //cv::Point3f point = detected_points[i];
-        float x = rot_rect[i].center.x - img_w/2.0;
-        float y = rot_rect[i].center.y - img_h/2.0;
-        cv::Mat temp_cam_2_obj = cv::Mat::eye(4, 4, CV_32F);
+        int i = R.at<float>(0,0) < R.at<float>(1,1) ? (R.at<float>(1,1) < R.at<float>(2,2) ? 2 : 1) : (R.at<float>(0,0) < R.at<float>(2,2) ? 2 : 0);
+        int j = (i + 1) % 3;
+        int k = (i + 2) % 3;
 
-        float Z = depth[i]/1000; // depth_img.at<float>(point.y, point.x)/1000;
-        float Y = y * Z/f_y;
-        float X = x * Z/f_x;
-        temp_cam_2_obj.at<float>(0, 3) = X;
-        temp_cam_2_obj.at<float>(1, 3) = Y;
-        temp_cam_2_obj.at<float>(2, 3) = Z;
+        float s = sqrt(R.at<float>(i, i) - R.at<float>(j,j) - R.at<float>(k,k) + 1.0);
+        Q[i] = s * 0.5;
+        s = 0.5 / s;
 
-        trans_vec.push_back((temp_cam_2_obj.inv() * camera2base).inv());
-        //trans_vec.push_back(base2camera * temp_cam_2_obj);
-        //std::cout << "camera2base" << camera2base << std::endl;
-        //std::cout << "base2camera" << base2camera.inv() << std::endl;
-        //trans_vec.push_back(temp_cam_2_obj);
+        Q[3] = (R.at<float>(k,j) - R.at<float>(j,k)) * s;
+        Q[j] = (R.at<float>(j,i) + R.at<float>(i,j)) * s;
+        Q[k] = (R.at<float>(k,i) + R.at<float>(i,k)) * s;
     }
-    return trans_vec;
 }

@@ -104,13 +104,20 @@ int main(int argc, char** argv)
 {
   // Initialize ROS
   ros::init(argc, argv, "pose_estimation");
-  ros::NodeHandle nh;
+  //ros::NodeHandle nh;
+  auto nh = ros::NodeHandle("~");
+
+  // Detector
+  PoseEstimation detector;
+  detector.Initialize(nh);
+/*
   typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> MySyncPolicy;
 
   message_filters::Subscriber<sensor_msgs::Image> image_rgb_sub(nh, "/camera/rgb/image_raw", 1);
   message_filters::Subscriber<sensor_msgs::Image> image_depth_sub(nh, "/camera/depth/image_raw", 1);
   message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), image_rgb_sub, image_depth_sub);
   sync.registerCallback(boost::bind(&OnImage, _1, _2));
+
 
   // Detector
   cv::Mat img_background = cv::imread("/home/user/workspace/src/pose_estimation/TEST/TEST_DETECTOR/background.jpg"); //background.jpg");
@@ -122,5 +129,8 @@ int main(int argc, char** argv)
   // Spin
   ros::ServiceServer service = nh.advertiseService("pose_est", estimate_pose);
   ROS_INFO("Ready to estimate relative position of the object.");
+  */
+
+  // Spin
   ros::spin();
 }

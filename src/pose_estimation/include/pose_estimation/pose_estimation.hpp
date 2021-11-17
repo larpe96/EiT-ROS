@@ -1,9 +1,24 @@
 #pragma once
 
 #include <iostream>
-#include <opencv2/opencv.hpp>
-#include <opencv2/xphoto/white_balance.hpp>
 #include <vector>
+#include <dynamic_reconfigure/server.h>
+#include "pose_estimation/pose_est_srv.h"
+#include <ros/ros.h>
+#include <cv_bridge/cv_bridge.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+#include <sensor_msgs/Image.h>
+#include "std_msgs/Bool.h"
+#include <string>
+#include <opencv/highgui.h>
+#include <ctime>
+#include <fstream>
+#include <ros/service_server.h>
+
+#include <pose_estimation/detector.h>
+#include <pose_estimation/PoseEstimationConfig.h>
 
 class PoseEstimation
 {
@@ -20,7 +35,13 @@ class PoseEstimation
         std::vector<cv::Mat> convert_2_transforms(std::vector<cv::RotatedRect> rot_rect, std::vector<float> depth, float img_w, float img_h);
         void drawCircles(cv::Mat &img, std::vector<cv::Vec3f> circles, cv::Scalar color, int radius);
 
-        cv::MatND background_histogram;
+    PoseEstimation();
+    void Initialize(const ros::NodeHandle &nh);
+    void OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, const sensor_msgs::ImageConstPtr& img_depth_msg);
+    bool Estimate_pose(pose_estimation::pose_est_srv::Request   &req, pose_estimation::pose_est_srv::Response  &res);
+    void getQuaternion(cv::Mat R, float Q[]);
+    std::vector<cv::Mat> Detect(cv::Mat &img_rgb, cv::Mat &img_depth, cv::Mat &img_binary);
+    void OnDynamicReconfigure(DynamicReconfigureType& config, uint32_t level);
 
     private:
         cv::Mat img;
