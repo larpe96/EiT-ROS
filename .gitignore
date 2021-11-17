@@ -1,6 +1,13 @@
 # Dirs
 fmauch_universal_robot/
 Universal_Robots_ROS_Driver/
+.vscode-server/
+.ros/
+.config/
+.rviz
+.gnupg/
+.ssh/
+.local/
 
 src/CMakeLists.txt
 .catkin_workspace
@@ -143,3 +150,5 @@ src/pose_estimation/.vscode/settings.json
 
 .catkin_tools/
 /logs
+.bash_history
+.gitconfig

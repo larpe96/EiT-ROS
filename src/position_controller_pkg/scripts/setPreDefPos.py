@@ -12,7 +12,7 @@ if __name__ == "__main__":
     get_tcp = rospy.ServiceProxy("GET/tcp_pose_srv", CurrTCPPose)
     enabl_freeDrive = rospy.ServiceProxy("SET/enable_teach", Trigger)
     disabl_freeDrive = rospy.ServiceProxy("SET/disable_teach", Trigger)
-    i =0
+    i =99
     answer = 'y'
     while(answer != "n"):
         res_en = enabl_freeDrive()
