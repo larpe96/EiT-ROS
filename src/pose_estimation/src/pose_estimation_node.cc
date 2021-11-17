@@ -1,4 +1,4 @@
-#include <pose_estimation/pose_estimation.hpp>
+#include <pose_estimation.hpp>
 #include "pose_estimation/pose_est_srv.h"
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
@@ -13,6 +13,7 @@
 PoseEstimation detector;
 cv::Mat img;
 cv::Mat img_depth;
+cv::Mat background;
 
 void getQuaternion(cv::Mat R, float Q[])
 {
@@ -112,9 +113,11 @@ int main(int argc, char** argv)
   sync.registerCallback(boost::bind(&OnImage, _1, _2));
 
   // Detector
-  cv::Mat img_background = cv::imread("/home/user/workspace/src/pose_estimation/src/background3.png"); //background.jpg");
+  cv::Mat img_background = cv::imread("/home/user/workspace/src/pose_estimation/TEST/TEST_DETECTOR/background.jpg"); //background.jpg");
   detector.calibrate_background(img_background);
-  detector.show_hist(detector.background_histogram);
+//   background = cv::imread("background.png");
+ cv::imshow("background", img_background);
+  //detector.show_hist(detector.background_histogram);
 
   // Spin
   ros::ServiceServer service = nh.advertiseService("pose_est", estimate_pose);
