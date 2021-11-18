@@ -92,5 +92,15 @@ namespace detector
 	 */
 	cv::Mat ErodeAndDilate(cv::Mat img, int erodeSize, int dilateSize);
 
+
+
+	/**
+	 * @brief Calculates the norm of the difference between the image and the background image
+	 * @param img Original RGB image
+	 * @param background Background image
+	 * @return 
+	 */
+	cv::Mat DiffNorm(cv::Mat &img_msg, cv::Mat background);
+	
 }
 

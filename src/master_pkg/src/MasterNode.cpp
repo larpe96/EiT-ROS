@@ -297,10 +297,10 @@ void MasterNode::stateLoop()
   case approach_pose:
     {
       int res = 0;
-      obj_pose.orientation.x = 0.17;
+      /*obj_pose.orientation.x = 0.17;
       obj_pose.orientation.y = -0.985;
       obj_pose.orientation.z = 0.0;
-      obj_pose.orientation.w = 0.0;
+      obj_pose.orientation.w = 0.0;*/
       //obj_pose.position.z = obj_pose.position.z + 0.1;
       geometry_msgs::Pose tcp_pose = obj_pose;
       tcp_pose.position.z = tcp_pose.position.z + 0.1;
