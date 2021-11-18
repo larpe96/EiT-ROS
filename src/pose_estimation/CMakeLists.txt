@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -98,11 +99,10 @@ generate_messages(
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
 ##     and list every .cfg file to be processed
 
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+# Generate dynamic reconfigure parameters in the 'cfg' folder
+generate_dynamic_reconfigure_options(
+  cfg/PoseEstimation.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -117,7 +117,8 @@ catkin_package(
    INCLUDE_DIRS include
   LIBRARIES pose_estimation
   CATKIN_DEPENDS
-    roscpp # OpenCV cv_bridge geometry_msgs image_transport message_generation roscpp sensor_msgs std_msgs
+    roscpp
+    dynamic_reconfigure # OpenCV cv_bridge geometry_msgs image_transport message_generation roscpp sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -128,13 +129,14 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include/pose_estimation
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
  add_library(${PROJECT_NAME}
    src/${PROJECT_NAME}.cc
+   src/detector.cc
 )
 
 ## Add cmake target dependencies of the library
@@ -146,7 +148,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/pose_estimation_node.cpp)
-
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 add_executable(${PROJECT_NAME}_node src/pose_estimation_node.cc)
 target_link_libraries(pose_estimation_node pose_estimation ${catkin_LIBRARIES})
 
@@ -223,6 +225,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 set( project_sources
    src/pose_estimation.cc
    src/pose_estimation_node.cc
+   src/detector.cc
 )
 
 add_executable(pose_est_server ${project_sources})

@@ -1,0 +1,13 @@
+background_path: /home/user/workspace/src/pose_estimation/src/backgroundEmpty.png
+empty_img_path: /home/user/workspace/src/pose_estimation/src/backgroundEmpty.png
+input_topic_rgb: /camera/rgb/image_raw
+input_topic_depth: /camera/depth/image_raw
+output_topic: /pose_est
+
+threshold_binary: 20
+erosion_size: 2
+dilation_size: 4
+mask_x: 0 #235
+mask_y: 0 #220
+mask_w: 640 #285
+mask_h: 480 #145
