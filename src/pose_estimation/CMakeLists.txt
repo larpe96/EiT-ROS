@@ -129,13 +129,14 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include/pose_estimation
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
  add_library(${PROJECT_NAME}
    src/${PROJECT_NAME}.cc
+   src/detector.cc
 )
 
 ## Add cmake target dependencies of the library
@@ -224,6 +225,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 set( project_sources
    src/pose_estimation.cc
    src/pose_estimation_node.cc
+   src/detector.cc
 )
 
 add_executable(pose_est_server ${project_sources})

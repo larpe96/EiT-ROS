@@ -1,4 +1,5 @@
-background_path: /home/mdn/bor/EiT-ROS/src/pose_estimation/src/backgroundBrown.png
+background_path: /home/user/workspace/src/pose_estimation/src/backgroundEmpty.png
+empty_img_path: /home/user/workspace/src/pose_estimation/src/backgroundEmpty.png
 input_topic_rgb: /camera/rgb/image_raw
 input_topic_depth: /camera/depth/image_raw
 output_topic: /pose_est
