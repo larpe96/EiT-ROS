@@ -62,7 +62,6 @@ class PoseEstimation
 
     cv::Mat img_diff_masked;
     cv::Mat img_diff;
-    cv::Mat img_diff_masked_grey;
     cv::Mat img_binary;
 
     float f_y = 574.0;
