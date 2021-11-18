@@ -24,7 +24,6 @@ namespace detector
   {
     std::vector<float> depth_within;
     cv::Mat filledImage = cv::Mat::zeros(depth_img.rows, depth_img.cols, CV_8UC1);
-    //cv::fillPoly(filledImage, contours, cv::Scalar(255, 255, 255));
     filledImage = FillContours(filledImage, contours);
 
     for (int i = 0; i < contours.size(); i++)
@@ -126,16 +125,6 @@ namespace detector
   void ShowDetections(cv::Mat img_rgb, std::vector<std::vector<cv::Point>> contours, std::vector<cv::RotatedRect> rot_rects)
   {
     cv::RNG rng = rng(12345);
-    //std::vector<cv::RotatedRect> minRect( contours.size() );
-    std::vector<cv::RotatedRect> minEllipse( contours.size() );
-    for( size_t i = 0; i < contours.size(); i++ )
-    {
-        //minRect[i] = cv::minAreaRect( contours[i] );
-        if( contours[i].size() > 5 )
-        {
-            minEllipse[i] = cv::fitEllipse( contours[i] );
-        }
-    }
 
     img_rgb.convertTo(img_rgb, CV_8UC3);
     cv::Mat drawing = cv::Mat::zeros( img_rgb.size(), CV_8UC3 );
@@ -146,8 +135,6 @@ namespace detector
         // contour
         cv::drawContours( drawing, contours, (int)i, color );
 
-        // ellipse
-        //cv::ellipse( drawing, minEllipse[i], color, 2 );
         // rotated rectangle
         cv::Point2f rect_points[4];
         //minRect[i].points( rect_points );
@@ -165,12 +152,11 @@ namespace detector
     std::vector<cv::Mat> trans_vec;
       for(int i = 0; i < rot_rect.size(); i++)
       {
-        //cv::Point3f point = detected_points[i];
         float x = rot_rect[i].center.x - img_w/2.0;
         float y = rot_rect[i].center.y - img_h/2.0;
         cv::Mat temp_cam_2_obj = cv::Mat::eye(4, 4, CV_32F);
 
-        float Z = depth[i]/1000; // depth_img.at<float>(point.y, point.x)/1000;
+        float Z = depth[i]/1000;
         float Y = y * Z/f_y;
         float X = x * Z/f_x;
         temp_cam_2_obj.at<float>(0, 3) = X;
@@ -218,13 +204,14 @@ namespace detector
     return img;
   }
 
-  cv::Mat DiffNorm(cv::Mat &img_msg, cv::Mat background)
+  cv::Mat DiffNorm(cv::Mat &img_orig, cv::Mat background)
   {
-    img_msg.convertTo(img_msg, CV_32FC3);
+    cv::Mat img
+    img_orig.convertTo(img, CV_32FC3);
     cv::Mat abs_diff, diff_square, diff_norm, diff_sum;
     background.convertTo(background, CV_32FC3);
 
-    cv::absdiff(img_msg, background, abs_diff); 
+    cv::absdiff(img, background, abs_diff); 
     diff_square = abs_diff.mul(abs_diff);
 
     // Sum across channels
