@@ -87,6 +87,58 @@ namespace detector
       }
   }
 
+  cv::Mat rotationMatrixToEulerAngles(cv::Mat R)
+{
+    float sy = sqrt(R.at<float>(0,0) * R.at<float>(0,0) +  R.at<float>(1,0) * R.at<float>(1,0) );
+
+    bool singular = sy < 1e-6;
+
+    float x, y, z;
+    if (!singular)
+    {
+        x = atan2(R.at<float>(2,1) , R.at<float>(2,2));
+        y = atan2(-R.at<float>(2,0), sy);
+        z = atan2(R.at<float>(1,0), R.at<float>(0,0));
+    }
+    else
+    {
+        x = atan2(-R.at<float>(1,2), R.at<float>(1,1));
+        y = atan2(-R.at<float>(2,0), sy);
+        z = 0;
+    }
+   // return cv::Vec3f(x, y, z);
+   cv::Mat R_eul = (cv::Mat_ <float>(3,1) << x, y, z);
+   return R_eul;
+}
+
+cv::Mat eulerAnglesToRotationMatrix(cv::Vec3f &theta)
+{
+    // Calculate rotation about x axis
+    cv::Mat R_x = (cv::Mat_<float>(3,3) <<
+               1,       0,              0,
+               0,       cos(theta[0]),   -sin(theta[0]),
+               0,       sin(theta[0]),   cos(theta[0])
+               );
+
+    // Calculate rotation about y axis
+    cv::Mat R_y = (cv::Mat_<float>(3,3) <<
+               cos(theta[1]),    0,      sin(theta[1]),
+               0,               1,      0,
+               -sin(theta[1]),   0,      cos(theta[1])
+               );
+
+    // Calculate rotation about z axis
+    cv::Mat R_z = (cv::Mat_<float>(3,3) <<
+               cos(theta[2]),    -sin(theta[2]),      0,
+               sin(theta[2]),    cos(theta[2]),       0,
+               0,               0,                  1);
+
+    // Combined rotation matrix
+    cv::Mat R = R_z * R_y * R_x;
+
+    return R;
+}
+
   std::vector<cv::RotatedRect> FindRotatedRects(std::vector<std::vector<cv::Point>> contours)
   {
       std::vector<cv::RotatedRect> rot_rect;
@@ -163,16 +215,37 @@ namespace detector
         temp_cam_2_obj.at<float>(1, 3) = Y;
         temp_cam_2_obj.at<float>(2, 3) = Z;
 
-        float angle = rot_rect[i].angle * 2*M_PI/360;
-        angle += 90 * 2*M_PI/360;
+        // Determine the rotation of the object in the image plane
+        float angle = rot_rect[i].angle;// * 2*M_PI/360;
+        if (rot_rect[i].size.width < rot_rect[i].size.height)
+        {
+          angle += 180;
+        }
+        else
+        {
+          angle += 90;
+        }
+
+        // Calculate grasp orientation
+        angle += 90;
+        angle = angle *2*M_PI/360;
 
         cv::Mat R_z = (cv::Mat_ <float>(3,3) << cos(angle), -sin(angle), 0,
                                                 sin(angle), cos(angle), 0,
-                                                0, 0, 1);
-        
-        R_z.copyTo(temp_cam_2_obj(cv::Rect(0, 0, R_z.cols, R_z.rows)));
+                                                0, 0, 1);    
+       R_z.copyTo(temp_cam_2_obj(cv::Rect(0, 0, R_z.cols, R_z.rows)));
 
-        trans_vec.push_back((temp_cam_2_obj.inv() * camera2base).inv());
+        // Change z-coordinate of the grasp position
+        cv::Mat T_temp = (temp_cam_2_obj.inv() * camera2base).inv();
+        T_temp.at<float>(2,3) = -15e-3;
+
+        // Change grasp orientation (Fixed RX and RY)
+        cv::Mat R_eul = rotationMatrixToEulerAngles(T_temp(cv::Rect(0, 0, 3, 3)));
+        cv::Vec3f theta(0.0, M_PI, R_eul.at<float>(2,0));
+        cv::Mat R_mat = eulerAnglesToRotationMatrix(theta);
+        R_mat.copyTo(T_temp(cv::Rect(0, 0, R_mat.cols, R_mat.rows)));
+        
+        trans_vec.push_back(T_temp);
       }
       return trans_vec;
   }
@@ -206,7 +279,7 @@ namespace detector
 
   cv::Mat DiffNorm(cv::Mat &img_orig, cv::Mat background)
   {
-    cv::Mat img
+    cv::Mat img;
     img_orig.convertTo(img, CV_32FC3);
     cv::Mat abs_diff, diff_square, diff_norm, diff_sum;
     background.convertTo(background, CV_32FC3);

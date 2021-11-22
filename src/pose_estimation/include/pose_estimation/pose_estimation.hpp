@@ -35,6 +35,8 @@ class PoseEstimation
     void getQuaternion(cv::Mat R, float Q[]);
     std::vector<cv::Mat> Detect(cv::Mat &img_rgb, cv::Mat &img_depth, cv::Mat &img_binary);
     void OnDynamicReconfigure(DynamicReconfigureType& config, uint32_t level);
+    cv::Mat rotationMatrixToEulerAngles(cv::Mat R);
+    cv::Mat eulerAnglesToRotationMatrix(cv::Vec3f &theta);
 
   private:
     /// Node handler
