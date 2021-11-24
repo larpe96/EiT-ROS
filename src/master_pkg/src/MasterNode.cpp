@@ -325,7 +325,7 @@ void MasterNode::stateLoop()
   case  grasp_obj:
     {
       state = error;
-      if (callServiceGripperGrasp(22,50) )
+      if (callServiceGripperGrasp(25,50) )
       {
         state = deproach_pose;
       }
