@@ -206,7 +206,7 @@ namespace detector
 
   cv::Mat DiffNorm(cv::Mat &img_orig, cv::Mat background)
   {
-    cv::Mat img
+    cv::Mat img;
     img_orig.convertTo(img, CV_32FC3);
     cv::Mat abs_diff, diff_square, diff_norm, diff_sum;
     background.convertTo(background, CV_32FC3);
