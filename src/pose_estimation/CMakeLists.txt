@@ -9,7 +9,6 @@ project(pose_estimation)
 ## is used, also find other catkin packages
 SET("OpenCV_DIR" "/usr/share/OpenCV")
 find_package(catkin REQUIRED COMPONENTS
-  OpenCV
   cv_bridge
   geometry_msgs
   image_transport
@@ -19,6 +18,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   dynamic_reconfigure
 )
+
+find_package(OpenCV REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
