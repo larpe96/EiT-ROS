@@ -12,7 +12,6 @@
 #include <sensor_msgs/Image.h>
 #include "std_msgs/Bool.h"
 #include <string>
-#include <opencv/highgui.h>
 #include <ctime>
 #include <fstream>
 #include <ros/service_server.h>
