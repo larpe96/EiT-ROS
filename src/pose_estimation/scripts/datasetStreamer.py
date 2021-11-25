@@ -8,7 +8,7 @@ from sensor_msgs.msg import Image
 class streamNode:
     def __init__(self):
         self.img_names = []
-        self.path = "/home/user/workspace/src/pose_estimation/data/2021-11-24_v0/"
+        self.path = "/home/user/workspace/src/pose_estimation/data/V1/2021-11-24_v1/"
         self.converter = CvBridge()
         self.pub = rospy.Publisher("/camera/rgb/image_raw",Image,queue_size=20)
         self.pub_d = rospy.Publisher("/camera/depth/image_raw", Image, queue_size=20)
@@ -34,9 +34,9 @@ class streamNode:
                 cv2.imshow("rgb_"+str(i),rgb)
                 cv2.waitKey(0)
                 cv2.destroyAllWindows()
-                ans = raw_input("Press enter to continue to next image pair. Press 'q' to exit")
-                if "q" == str(ans):
-                    exit()
+            ans = raw_input("Press enter to continue to next image pair. Press 'q' to exit")
+            if "q" == str(ans):
+                exit()
         cv2.destroyAllWindows()
         self.pub.unregister()
 
@@ -49,10 +49,7 @@ if __name__ == "__main__":
     print("a")
     #try:
     sN = streamNode()
-    try:
-        sN.run(True)
-    except KeyboardInterrupt:
-                exit(0)
+    sN.run()
     # except:
     #     print("SOMETHING WRONG")
     #     exit(-1)

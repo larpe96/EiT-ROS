@@ -1,44 +1,47 @@
+import csv
 import os
+from typing import Any
 import cv2
 import numpy as np
+from numpy.core.defchararray import center
+import pandas as pd
+import sklearn
 
 
-def DiffNorm(img, background):
-    
-    absdiff = cv2.absdiff(img, background)
-    # diff_square = absdiff.mul(absdiff)
-    abc = []
 
-    # print(absdiff.size)
-    a, b, c = cv2.split(absdiff, [])
-
-    diff_sum = a+b+c
-    # img_ = cv2.imshow("HELLO", diff_sum)
-    # cv2.waitKey(500)
-    # diff_norm = None
-    # diff_norm= cv2.sqrt(diff_sum)
-    return diff_sum
-
-def ErodeAndDilate(img, erodeSize, dilateSize):
-    struct_element = cv2.getStructuringElement(cv2.MORPH_CROSS,(3,3))
-
-    for i in range(erodeSize):
-        cv2.erode(img, struct_element,dst=img)
-    
-    for i in range(dilateSize):
-        cv2.dilate(img,struct_element, dst=img)
-    return img
-
-Good_list= [7, 4, 1, 8, 5, 2, 6, 9 ] # obj1
 
 
 
 class Obj_class:
     def __init__(self):
-        self.path = "/home/user/workspace/src/pose_estimation/data/obj_1/"
-        #self.background = cv2.imread("/home/user/workspace/src/pose_estimation/src/backgroundEmpty.png") 
+        self.path = "/home/user/workspace/src/pose_estimation/data/V0"
+        #self.background = cv2.imread("/home/user/workspace/src/pose_estimation/src/backgroundEmpty.png")
         self.files = []
         #self.setImgs()
+        self.name = "data_v0.csv"
+        self.load_csv(self.path+"/"+ self.name)
+
+
+        
+    def load_csv(self, path):
+        with open(path) as csv_file:
+            csv.reader(csv_file, delimiter=",")
+            self.img_names = []
+            self.center_x = []
+            self.center_y = []
+            self.width = []
+            self.height = []
+            self.label = []
+            self.angle = []
+            for row in csv_file:
+                self.img_names.append(row[0])
+                self.center_x.append(float(row[1]))
+                self.center_y.append(float(row[2]))
+                self.width.append(float(row[3]))
+                self.height.append(float(row[4]))
+                self.label.append(row[5])
+                self.angle.append(float(row[6]))
+            
 
     def setImgs(self):
         files = os.listdir(self.path)
@@ -46,21 +49,20 @@ class Obj_class:
             if file.endswith(".png"):
                 self.files.append(file)
 
-    def run(self):
+    def calc_huMoments(self):
         humoments_tot = np.zeros([8,7])
         i=0
-        for number in Good_list:
+        for number, file in enumerate(self.files):
             name = "rgb_obj1_"+str(number)+".png"
             path_name = self.path+name
             img = cv2.imread(path_name,cv2.IMREAD_GRAYSCALE)
 
             # new_img = DiffNorm(img, self.background)
             bin_img = cv2.threshold(img, 150, 255,cv2.THRESH_BINARY)[1]
-            bin_img = ErodeAndDilate(bin_img,3,2)
 
             moments = cv2.moments(bin_img)
             hu_moments = cv2.HuMoments(moments)
-            
+
             humoments_tot[i][0]= hu_moments[0]
             humoments_tot[i][1]= hu_moments[1]
             humoments_tot[i][2]= hu_moments[2]
@@ -81,11 +83,10 @@ class Obj_class:
             cv2.waitKey(0)
             cv2.destroyAllWindows()
 
-        np.savetxt("test.csv", humoments_tot,delimiter=',')
+        #np.savetxt("test.csv", humoments_tot,delimiter=',')
 
 
 
 
 if __name__ =="__main__":
     classifier = Obj_class()
-    classifier.run()

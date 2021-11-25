@@ -1,0 +1,3 @@
+<launch>       
+	<node pkg="classifier_pkg" name="Classifier_node" type="Classifier_node.py" output="screen"/>
+</launch>
