@@ -18,7 +18,7 @@ class Robot(RTDEControl, RTDEReceive, RTDEIO):
     def __init__(self, _ip):
         RTDEControl.__init__(self, _ip)
         RTDEIO.__init__(self, _ip,)
-        RTDEReceive.__init__(self, _ip,[])
+        RTDEReceive.__init__(self, _ip,frequency = -1.0, variables = [], verbose = False, use_upper_range_registers = False)
         self.ip = _ip
 
     def cb_test(self, req):
@@ -126,8 +126,8 @@ if __name__ =="__main__":
     except:
         print("robot connection failed")
         print("Trying VM")
-        try:
-            _ip = "127.0.0.1" # VM
-            ser_node = Servicenode(_ip)
-        except ROSInterruptException:
-            pass
+#        try:
+#            _ip = "127.0.0.1" # VM
+#            ser_node = Servicenode(_ip)
+#        except ROSInterruptException:
+#            pass

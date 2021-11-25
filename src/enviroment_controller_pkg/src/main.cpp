@@ -24,22 +24,22 @@
 //   }
 //    return 0;
 // };
-
-
-// init_assKit_pose.orientation.x = 0.573358194501323;
-// init_assKit_pose.orientation.y = 0.8192435837733383;
-// init_assKit_pose.orientation.z = 0.005706168482240197;
-// init_assKit_pose.orientation.w = 0.008232307431875443;
+// origoMount.orientation.x=0;
+//     origoMount.orientation.y =0.;
+//     origoMount.orientation.z =  -0.06014734;// 157.20 deg around base z
+//     origoMount.orientation.w =  -0.99818951; // 157.20 deg around base z
 
 int main(int argc, char **argv)
 {
+  std::cout <<"START" << std::endl;
   geometry_msgs::Point init_pos;
   init_pos.x = 0.34496893818469754;
   init_pos.y = -0.17792548888661716;
   init_pos.z = -0.012063987217307198;
 
-  ros::init(argc, argv, "envir_node");
+  //ros::init(argc, argv, "envir_node");
   EnviromentControllerNode node(init_pos);  
+  std::cout << "ENDED" << std::endl;
   //ros::shutdown();
   return 0;
 }

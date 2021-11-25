@@ -18,6 +18,7 @@ EnviromentControllerNode::EnviromentControllerNode()
  *------------------------------------------------------------------*/
 EnviromentControllerNode::EnviromentControllerNode(geometry_msgs::Point _oriPose)
 {
+    AssemblyKit Test;
 
 } // end masterNode()
 geometry_msgs::Point EnviromentControllerNode::convert_kit_to_base_pose(geometry_msgs::Point)

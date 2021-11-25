@@ -5,19 +5,11 @@ Module::Module(/* args */)
 {
 }
 
-Module::Module(Object _obj, TMatrix _motherFrame, TMatrix _motherGripFrame )
+Module::Module(std::string _module_type, std::vector<Pose> _occupied_poses)
 {
-    object = _obj;
     object_in_module = false;
-    size = 1;
-}
-
-Module::Module(Object _obj, TMatrix _motherFrame, Pose _oc_pos)
-{
-    object = _obj;
-    object_in_module = false;
-    size = 1;
-    poses.push_back(_oc_pos);
+    type = _module_type;
+    poses = _occupied_poses;
 }
 
 Module::~Module()
@@ -29,13 +21,12 @@ int Module::getSize()
     return poses.size();
 }
 
-void Module::setOccupiedPoses(std::vector<Pose> _vec)
+void Module::setID(int _id)
 {
-    poses = _vec;
-    Pose _oc_pos = poses.at(0);
+    id = _id;
 }
 
-std::vector<Pose> Module::getOccupiedPoses()
+int Module::getID()
 {
-    return poses;
+   return id;
 }

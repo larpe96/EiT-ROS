@@ -16,7 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 set(SOURCES
   src/main.cpp
-  src/Object.cpp
   src/Module.cpp
   src/AssemblyKit.cpp
   src/EnviromentControllerNode.cpp
