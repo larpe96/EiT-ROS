@@ -100,7 +100,7 @@ namespace detector
 	 * @param background Background image
 	 * @return 
 	 */
-	cv::Mat DiffNorm(cv::Mat &img_msg, cv::Mat background);
-	
+	cv::Mat DiffNorm(cv::Mat &img, cv::Mat background);
+
 }
 

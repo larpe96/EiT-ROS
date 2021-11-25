@@ -12,7 +12,6 @@
 #include <sensor_msgs/Image.h>
 #include "std_msgs/Bool.h"
 #include <string>
-#include <opencv/highgui.h>
 #include <ctime>
 #include <fstream>
 #include <ros/service_server.h>
@@ -35,6 +34,8 @@ class PoseEstimation
     void getQuaternion(cv::Mat R, float Q[]);
     std::vector<cv::Mat> Detect(cv::Mat &img_rgb, cv::Mat &img_depth, cv::Mat &img_binary);
     void OnDynamicReconfigure(DynamicReconfigureType& config, uint32_t level);
+    cv::Mat rotationMatrixToEulerAngles(cv::Mat R);
+    cv::Mat eulerAnglesToRotationMatrix(cv::Vec3f &theta);
 
   private:
     /// Node handler
@@ -62,14 +63,13 @@ class PoseEstimation
 
     cv::Mat img_diff_masked;
     cv::Mat img_diff;
-    cv::Mat img_diff_masked_grey;
     cv::Mat img_binary;
 
     float f_y = 574.0;
     float f_x = 574.0;
-    cv::Mat camera2base = (cv::Mat_<float>(4,4) << -0.4092872843859879, 0.9119913122596123, -0.02749118409475548, 0.4613890083554278,
-                                                    0.9118304765329119, 0.4099132124339962, 0.02315902281622022, -0.396963379231898,
-                                                    0.03238982719471067, -0.01558860593609109, -0.9993537384026068, 0.5628008106183637,
+    cv::Mat camera2base = (cv::Mat_<float>(4,4) << -0.4239851138500654, 0.9055161821251454, -0.01664533397227496, 0.464894891647513,
+                                                    0.9036243510870013, 0.424190730960022, 0.05937386538029141, -0.4129218758926164,
+                                                    0.06082479228194684, 0.01013250596365761, -0.9980970278318407, 0.5500317523427357,
                                                     0, 0, 0, 1);
     bool service_started = false;
 };

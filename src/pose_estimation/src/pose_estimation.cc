@@ -32,31 +32,45 @@ void PoseEstimation::OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, cons
   cv_ptr->image.copyTo(img_rgb);
   cv_ptr_depth->image.copyTo(img_depth);
 
-
-  cv::Mat diff_norm = detector::DiffNorm(img_rgb, img_empty_background);
-
   // Get diff image
-  //cv::absdiff(img_rgb, img_empty_background, img_diff);
+  bool use_DiffNorm = 1;
+  if(use_DiffNorm)
+  {
+    img_diff = detector::DiffNorm(img_rgb, img_empty_background);
+  }
+  else
+  {
+    cv::absdiff(img_rgb, img_empty_background, img_diff);
+    
+    // Grey
+    cv::cvtColor(img_diff, img_diff, cv::COLOR_BGR2GRAY);
+  }
 
   // Apply mask
-  //img_diff_masked = detector::ApplyMask(img_diff, config_.mask_x, config_.mask_y, config_.mask_w, config_.mask_h);
-
-  // Grey
-  //cv::cvtColor(img_diff_masked, img_diff_masked_grey, cv::COLOR_BGR2GRAY);
+  img_diff_masked = detector::ApplyMask(img_diff, config_.mask_x, config_.mask_y, config_.mask_w, config_.mask_h);
 
   // Threshold back projected image to create a binary mask og the projected image
-  cv::threshold(diff_norm, img_binary, config_.threshold_binary, 255.0, cv::THRESH_BINARY);
+  cv::threshold(img_diff_masked, img_binary, config_.threshold_binary, 255.0, cv::THRESH_BINARY);
 
   // Erode binary image
   img_binary = detector::ErodeAndDilate(img_binary, config_.erosion_size, config_.dilation_size);
 
+  // Image for testing depth registration
+  double max = 1;
+  double min = 0;
+  cv::Mat falseColorMap;
+  cv::Mat adjMap;
+  cv::minMaxIdx(img_depth, &min, &max);
+  img_depth.convertTo(adjMap, CV_8UC1, 255 / (max-min), -min);
+  cv::applyColorMap(adjMap, falseColorMap, cv::COLORMAP_AUTUMN);
+
   // Show images
 	cv::imshow("rgb", img_rgb);
 	cv::imshow("depth", img_depth);
-
-	//cv::imshow("diff", img_diff);
-  cv::imshow("diff masked", diff_norm);
+	cv::imshow("diff", img_diff);
+  cv::imshow("diff masked", img_diff_masked);
   cv::imshow("binary", img_binary);
+  cv::imshow("depth test", falseColorMap);
   cv::waitKey(1);
 }
 
@@ -177,7 +191,6 @@ void PoseEstimation::OnDynamicReconfigure(PoseEstimation::DynamicReconfigureType
           );
 
   camera_sync_->registerCallback(boost::bind(&PoseEstimation::OnImage, this, _1, _2));
-
 
   }
 
