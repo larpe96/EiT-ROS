@@ -10,6 +10,7 @@ Module::Module(int id, std::string type, Pose position, geometry_msgs::Pose pose
    object_in_module = false;
    module_type = type;
    pose_in_kit = position;
+  
    TMatrix temp(pose_for_drop_off);
    drop_off_pose = temp;
 

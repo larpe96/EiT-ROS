@@ -28,9 +28,6 @@ RMatrix RMatrix::transpose()
     int len_i = sizeof(mat)/sizeof(mat[0]);
     int len_j = sizeof(mat[0])/sizeof(mat[0][0]);
 
-    // std::cout<<"printing R\n";
-    // print();
-
     for(int i=0; i<len_i;i++)
     {
         for(int j=0; j<len_j;j++)
@@ -38,8 +35,6 @@ RMatrix RMatrix::transpose()
             res.mat[j][i] = mat[i][j];
         }
     }
-    // std::cout<<"printing R^T\n";
-    // res.print();
     return res;
 }
 
@@ -223,7 +218,6 @@ geometry_msgs::Pose TMatrix::getPose()
     float scale_fac = 0.5/(sqrt(temp));
 
     // norm quat
-    std::cout<<"SCALE:\t"<<scale_fac<<"\n";
     pose.orientation.x = _x * scale_fac;
     pose.orientation.y = _y * scale_fac;
     pose.orientation.z = _z * scale_fac;
@@ -318,15 +312,10 @@ TMatrix TMatrix::inverse()
     TMatrix tmat; // translation
     tmat.setTranslation((-1)*mat[0][3]/mat[3][3],(-1)*mat[1][3]/mat[3][3],(-1)*mat[2][3]/mat[3][3]);
 
-    // std::cout<<"print mat\n";
-    // print();
-
     RMatrix rmat(mat[0][0],mat[0][1],mat[0][2],mat[1][0],mat[1][1],mat[1][2],mat[2][0],mat[2][1],mat[2][2]);
     rmat = rmat.transpose();
 
     TMatrix T_r_transpose(rmat);
-    // std::cout<<"T_r_transpose mat\n";
-    // T_r_transpose.print();
     return T_r_transpose*tmat;
 }
 

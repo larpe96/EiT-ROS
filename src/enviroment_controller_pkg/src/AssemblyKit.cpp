@@ -2,85 +2,6 @@
 
 AssemblyKit::AssemblyKit(/* args */)
 {
-    // is_kit_full = false;
-    // frame.eye();
-    // std::cout << "here1" << std::endl;
-    // init_grid(5,5);
-    //jsonLoader::test();
-    
-
-    // // std::cout << "here2" << std::endl;
-    // // std::vector<Pose> temp_vec;
-    // // Pose temp_pose;
-    // // temp_pose.x = 1; 
-    // // temp_pose.y = 1;
-    // // temp_vec.push_back(temp_pose); 
-    // // temp_pose.y = 2;
-    // // temp_vec.push_back(temp_pose);
-
-    // // temp_pose.y = 3;
-    // // temp_vec.push_back(temp_pose);
-
-    // // addModule("typeA",temp_vec);
-    // // std::cout << "here3" << std::endl;
-    // // printGrid();
-    // // temp_vec.clear();
-    // // temp_pose;
-    // // temp_pose.x = 2; 
-    // // temp_pose.y = 1;
-    // // temp_vec.push_back(temp_pose); 
-    // // temp_pose.y = 2;
-    // // temp_vec.push_back(temp_pose);
-
-    // // temp_pose.y = 3;
-    // // temp_vec.push_back(temp_pose);
-    // // addModule("testB",temp_vec);
-    // // modules[1].object_in_module = true;
-    // // std::cout << "here3.5" << std::endl;
-    // // printGrid();
-    // // std::cout << numberOfModules()<< std::endl;
-    // // removeModule(modules[0]);
-    // // std::cout << numberOfModules()<< std::endl;
-    // // printGrid();
-    // origo_mount.position.x =  -0.255;
-    // origo_mount.position.y = -0.81623;
-    // origo_mount.position.z = -0.1;
-    // // origo_mount.orientation.x = 0.1976573;
-    // // origo_mount.orientation.y = 0.9802712;
-    // // origo_mount.orientation.z = 0.0;
-    // // origo_mount.orientation.w = 0.;
-    
-    // origo_mount.orientation.x = 0;
-    // origo_mount.orientation.y = 0.;
-    // origo_mount.orientation.z = 0.1976573;
-    // origo_mount.orientation.w = 0.9802712; 
-
-    // geometry_msgs::Pose pose_new;
-    // pose_new.position.x =  0.05;
-    // pose_new.position.y =  0.05;
-    // pose_new.position.z = 0;
-    // pose_new.orientation.x = 0.3826834;
-    // pose_new.orientation.y = 0.9238795;
-    // pose_new.orientation.z =  0;
-    // pose_new.orientation.w =  0;
-
-    // TMatrix base_to_assembly_origo(origo_mount);
-    
-    // std::cout << pose_new<< std::endl;
-
-    // TMatrix test(pose_new);
-    // TMatrix inv_test = test.inverse();
-
-    // std::cout << inv_test.getPose()<< std::endl;
-
-    // TMatrix test2(pose_new);
-
-    // test2 = base_to_assembly_origo*test2;
-
-    // test2.print();
-    // std::cout << test2.getPose() <<std::endl;
-
-
 }
 AssemblyKit::AssemblyKit(std::vector<std::vector<int>>new_grid_matrix,geometry_msgs::Pose new_origo)
 {
@@ -93,8 +14,6 @@ AssemblyKit::~AssemblyKit()
 {
 }
 
-
-/// PROTECTED
 
 void AssemblyKit::init_grid(int size_y,int size_x)
 {
@@ -127,7 +46,6 @@ int AssemblyKit::findFreeModuleIndex(std::string type)
     }
     for (int i = 0; i < modules.size(); i++)
     {
-        std::cout <<modules[i].module_type << type << std::endl;
         if (modules[i].module_type == type)
         {
             if (modules[i].object_in_module == false)
@@ -142,7 +60,6 @@ int AssemblyKit::findFreeModuleIndex(std::string type)
 
 void AssemblyKit::printGrid()
 {
-    std::cout << "Start print" <<std::endl;
     for (int x = 0; x < grid_matrix.size(); x++)
     {
         for (int y = 0; y < grid_matrix[0].size(); y++)
