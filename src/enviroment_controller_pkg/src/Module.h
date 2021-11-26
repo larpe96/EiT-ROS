@@ -20,21 +20,20 @@ class Module
 {
 
 protected:
-    int id;
+    int module_id;
     float step_size = 0.050; //m
 
 public:
     Module(/* args */);
-    Module(std::string type, std::vector<Pose>);
+    Module(int id, std::string type, Pose position, geometry_msgs::Pose pose_for_drop_off,geometry_msgs::Pose pose_for_approach);
 
-    int getSize();
-    void setID(int);
     int getID();
-    std::vector<Pose> poses;
+    void setID(int);
+    Pose pose_in_kit;
     bool object_in_module = false;
-    std::string type;
-
-    TMatrix dropOffPose;
+    std::string module_type;
+    TMatrix approach_pose;
+    TMatrix drop_off_pose;
 
 
     ~Module();

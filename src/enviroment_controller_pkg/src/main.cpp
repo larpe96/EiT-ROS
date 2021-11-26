@@ -1,14 +1,15 @@
 #include "EnviromentControllerNode.h"
-// #include<sstream>
-// #include <signal.h>
-#include <geometry_msgs/Point.h>
-// int run_loop = 1;
 
-// void mySigintHandler(int sig)
-// {
-//   ros::shutdown();
-//   run_loop = 0;
-// }
+#include<sstream>
+#include <signal.h>
+#include <geometry_msgs/Point.h>
+int run_loop = 1;
+
+void mySigintHandler(int sig)
+{
+  ros::shutdown();
+  run_loop = 0;
+}
 
 
 // int main(int argc, char **argv)
@@ -32,14 +33,15 @@
 int main(int argc, char **argv)
 {
   std::cout <<"START" << std::endl;
-  geometry_msgs::Point init_pos;
-  init_pos.x = 0.34496893818469754;
-  init_pos.y = -0.17792548888661716;
-  init_pos.z = -0.012063987217307198;
-
-  //ros::init(argc, argv, "envir_node");
-  EnviromentControllerNode node(init_pos);  
+  ros::init(argc, argv, "envir_node");
+  EnviromentControllerNode node;  
   std::cout << "ENDED" << std::endl;
-  //ros::shutdown();
+  signal(SIGINT, mySigintHandler);
+  ros::Rate r(1);
+  while(run_loop)
+  {		 ros::spinOnce();
+          r.sleep();
+  }
+   return 0;
   return 0;
 }

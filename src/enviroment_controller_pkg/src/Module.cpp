@@ -5,28 +5,30 @@ Module::Module(/* args */)
 {
 }
 
-Module::Module(std::string _module_type, std::vector<Pose> _occupied_poses)
+Module::Module(int id, std::string type, Pose position, geometry_msgs::Pose pose_for_drop_off,geometry_msgs::Pose pose_for_approach)
 {
-    object_in_module = false;
-    type = _module_type;
-    poses = _occupied_poses;
+   object_in_module = false;
+   module_type = type;
+   pose_in_kit = position;
+   TMatrix temp(pose_for_drop_off);
+   drop_off_pose = temp;
+
+   TMatrix temp2(pose_for_approach);
+   approach_pose = temp2;
+
+   module_id = id;
 }
 
 Module::~Module()
 {
 }
 
-int Module::getSize()
+int Module::getID()
 {
-    return poses.size();
+   return module_id;
 }
 
 void Module::setID(int _id)
 {
-    id = _id;
-}
-
-int Module::getID()
-{
-   return id;
+   module_id =  _id;
 }

@@ -1,0 +1,83 @@
+{
+    "modules":
+    {
+    "1":
+		{
+    	"module_type": "type1",
+		"module_dropoff": {
+			"Translation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.1},
+			"Orientation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.3826834,
+				"w":0.9238795}
+				},
+		"module_approach_pose": {
+			"Translation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.3},
+			"Orientation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.3826834,
+				"w":0.9238795}
+				}
+    	},
+	"2":
+		{
+    	"module_type": "type2",
+		"module_dropoff": {
+			"Translation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.1},
+			"Orientation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.3826834,
+				"w":0.9238795}
+				},
+		"module_approach_pose": {
+			"Translation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.3},
+			"Orientation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.3826834,
+				"w":0.9238795}
+				}
+    	},
+	"3":
+    	{
+    	"module_type": "type3",
+		"module_dropoff": {
+			"Translation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.1},
+			"Orientation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.3826834,
+				"w":0.9238795}
+				},
+		"module_approach_pose": {
+			"Translation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.3},
+			"Orientation":{
+				"x":0.0,
+				"y":0.0,
+				"z":0.3826834,
+				"w":0.9238795}
+				}
+    	}    
+    }
+}
