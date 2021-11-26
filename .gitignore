@@ -21,6 +21,7 @@ devel/
 __pycache__/
 *.py[cod]
 *$py.class
+*.eit
 
 # C extensions
 *.so
