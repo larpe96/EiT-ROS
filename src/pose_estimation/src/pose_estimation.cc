@@ -107,6 +107,28 @@ bool PoseEstimation::Estimate_pose(pose_estimation::pose_est_srv::Request   &req
 	return true;
 }
 
+bool PoseEstimation::callClassifier(std::vector<cv::RotatedRect> rot_rects, std::vector<std::string> &labels, std::vector<int> &mask)
+{
+  classifier_pkg::classify_detections::Request cds_req;
+  classifier_pkg::classify_detections::Response cds_res;
+
+  cds_req.header.stamp = ros::Time::now();
+  for (cv::RotatedRect& r:rot_rects)
+  {
+    classifier_pkg::Classification_params param;
+    param.width = r.size.width;
+    param.height = r.size.height;
+    cds_req.params.push_back(param);
+  }
+
+  if(classify_detections.call(cds_req, cds_res))
+  {
+    labels = cds_res.names;
+    mask = cds_res.mask;
+    return true;
+  }
+  return false;
+}
 
 std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth, cv::Mat &img_binary)
 {
@@ -125,6 +147,11 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
 
   // Find rotated rects
   std::vector<cv::RotatedRect> rot_rects = detector::FindRotatedRects(contours2);
+
+  // Classify detections
+  std::vector<std::string> labels;
+  std::vector<int> mask;
+  bool res = callClassifier(rot_rects, labels, mask);
 
   // Save detections to file
   detector::SaveToFile(img_rgb, img_depth, rot_rects);
@@ -176,10 +203,10 @@ void PoseEstimation::OnDynamicReconfigure(PoseEstimation::DynamicReconfigureType
   std::cout << "reconfig" << std::endl;
 
   // Subscribers
-
   bool resubscribe = !camera_sync_ ||
   subscriber_rgb_->getTopic() != config_.input_topic_rgb ||
   subscriber_depth_->getTopic() != config_.input_topic_depth;
+  
   if (resubscribe)
   {
     subscriber_rgb_ = std::make_shared<decltype(subscriber_rgb_)::element_type>(nh_, config_.input_topic_rgb, 1);
@@ -189,9 +216,7 @@ void PoseEstimation::OnDynamicReconfigure(PoseEstimation::DynamicReconfigureType
             *subscriber_rgb_,
             *subscriber_depth_
           );
-
   camera_sync_->registerCallback(boost::bind(&PoseEstimation::OnImage, this, _1, _2));
-
   }
 
   // Service
