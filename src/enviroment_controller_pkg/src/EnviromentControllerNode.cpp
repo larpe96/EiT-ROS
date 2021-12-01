@@ -10,7 +10,7 @@ EnviromentControllerNode::EnviromentControllerNode()
     resetAssemblyKit();
     //server services
     reset_kit_server = n.advertiseService("reset_kit", &EnviromentControllerNode::resetKit,this);
-    get_module_poses_server = n.advertiseService("get_module_poses", &EnviromentControllerNode::sendModulePoses,this);
+    get_module_poses_server = n.advertiseService("get_module_drop_off_poses", &EnviromentControllerNode::sendModulePoses,this);
 } // end 
 
 void EnviromentControllerNode::resetAssemblyKit()
@@ -45,6 +45,9 @@ bool EnviromentControllerNode::sendModulePoses(enviroment_controller_pkg::module
 
     res.drop_off_pose = drop_off_pose;
     res.approach_pose = approach_pose;
+
+    std::cout << req.obj_type << std::endl;
+    std::cout<< "drop_off_pose" << drop_off_pose << std::endl;
     
     return true;
 }
