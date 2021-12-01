@@ -77,11 +77,11 @@ int MasterNode::setupServices()
   {
     return 0;
    }
-  setupBool = ros::service::waitForService("get_module_drop_off_poses", 10);
-  if (setupBool == 0)
-  {
-    return 0;
-  }
+  // setupBool = ros::service::waitForService("get_module_drop_off_poses", 10);
+  // if (setupBool == 0)
+  // {
+  //   return 0;
+  // }
   setupBool = ros::service::waitForService("move2_pos_srv", 10);
   if (setupBool == 0)
   {
@@ -118,7 +118,7 @@ int MasterNode::setupServices()
   gripper_grasp_client = n.serviceClient<master_pkg::gripper_Move>("wsg_50_driver/grasp");
   gripper_set_force_client = n.serviceClient<master_pkg::gripper_Conf>("wsg_50_driver/set_force");
 
-  drop_off_poses_client = n.serviceClient<enviroment_controller_pkg::module_poses_srv>("get_module_drop_off_poses");
+  //drop_off_poses_client = n.serviceClient<enviroment_controller_pkg::module_poses_srv>("get_module_drop_off_poses");
 
   //server services
   system_state_server = n.advertiseService("system_state", &MasterNode::sendSystemState,this);
@@ -303,7 +303,7 @@ void MasterNode::stateLoop()
     break;
   case ready:
     {
-      std::cout << callServiceObjDropOff("type1")<< std::endl;
+      //std::cout << callServiceObjDropOff("type1")<< std::endl;
       break;
     }
   case  get_pose:
