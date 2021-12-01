@@ -48,7 +48,7 @@ bool MasterNode::initGraspSeq(std_srvs::Trigger::Request  &req,
     res.message = "system is running";
     return true;
   }
-  
+
 }
 
 bool MasterNode::setupNodes()
@@ -59,30 +59,28 @@ bool MasterNode::setupNodes()
     return 0;
   }
 
-  if (callServiceGripperMove(50, 100) == 0)
+  if (callServiceGripperMove(100, 100) == 0)
   {
     return 0;
   }
+
+
   return 1;
 }
 int MasterNode::setupServices()
 {
   int setupBool = 1;
-
-  //Wait for the service
-  // setupBool = ros::service::waitForService("pose_est", 10);
-
-  // if (setupBool == 0)
-  // {
-  //   return 0;
-  // }
-
   setupBool = ros::service::waitForService("get_module_drop_off_poses", 10);
   if (setupBool == 0)
   {
     return 0;
   }
 
+  setupBool = ros::service::waitForService("pose_est", 10);
+  if (setupBool == 0)
+  {
+    return 0;
+   }
   setupBool = ros::service::waitForService("move2_pos_srv", 10);
   if (setupBool == 0)
   {
@@ -111,7 +109,7 @@ int MasterNode::setupServices()
 
 
   //client services
-  // pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
+  pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
   tcp_control_client = n.serviceClient<position_controller_pkg::Tcp_move>("move2_pos_srv");
   tcp_pre_def_control_client = n.serviceClient<position_controller_pkg::Pre_def_pose>("move2_def_pos_srv");
 
@@ -230,11 +228,11 @@ int MasterNode::callServicePoseEstimate()
     }
 
 }
-bool MasterNode::callServiceTcpMove()
+bool MasterNode::callServiceTcpMove(geometry_msgs::Pose TCP_pose)
 {
     position_controller_pkg::Tcp_move msg;
 
-    msg.request.pose = obj_pose;
+    msg.request.pose = TCP_pose;
 
     if(!tcp_control_client.call(msg))
     {
@@ -309,14 +307,15 @@ void MasterNode::stateLoop()
     }
   case  get_pose:
     {
-      int res = 1;// callServicePoseEstimate();
+      int res = 0;
+      res = callServicePoseEstimate();
       if( res == 1 )
       {
         state = approach_pose;
       }
       else if(res == 0)
       {
-        state = error;
+        state = get_pose;
       }
       else
       {
@@ -325,20 +324,75 @@ void MasterNode::stateLoop()
       break;
     }
   case approach_pose:
-    state = callServicePreMove(approach_pose_name) ? move_to_pose : error;
-    break;
+    {
+      int res = 0;
+      obj_pose.orientation.x = 0.17;
+      obj_pose.orientation.y = -0.985;
+      obj_pose.orientation.z = 0.0;
+      obj_pose.orientation.w = 0.0;
+      //obj_pose.position.z = obj_pose.position.z + 0.1;
+      geometry_msgs::Pose tcp_pose = obj_pose;
+      tcp_pose.position.z = tcp_pose.position.z + 0.1;
+      res = callServiceTcpMove(tcp_pose);
+      if (res == 1)
+      {
+        state = move_to_pose;
+      }
+      else
+      {
+        state = error;
+      }
+      break;
+    }
+
   case  move_to_pose:
-    //state = callServiceTcpMove() ? grasp_obj : error;
-    state = callServicePreMove(grasp_pose_name) ? grasp_obj : error;
+  {
+    
+    state = callServiceTcpMove(obj_pose) ? grasp_obj : error;
     break;
+    }
   case  grasp_obj:
-    state = callServiceGripperGrasp(22,50) ? move_with_obj : error;
-    break;
+    {
+      state = error;
+      if (callServiceGripperGrasp(22,50) )
+      {
+        state = deproach_pose;
+      }
+      else 
+      {
+        if (callServiceGripperMove(100,100))
+        {
+          state = callServicePreMove(home_pose_name) ? get_pose : error;
+        }
+      }
+      break;
+    }
+  case deproach_pose:
+    {
+      int res = 0;
+      obj_pose.orientation.x = 0.17;
+      obj_pose.orientation.y = -0.985;
+      obj_pose.orientation.z = 0.0;
+      obj_pose.orientation.w = 0.0;
+      //obj_pose.position.z = obj_pose.position.z + 0.1;
+      geometry_msgs::Pose tcp_pose = obj_pose;
+      tcp_pose.position.z = tcp_pose.position.z + 0.1;
+      res = callServiceTcpMove(tcp_pose);
+      if (res == 1)
+      {
+        state = move_with_obj;
+      }
+      else
+      {
+        state = error;
+      }
+      break;
+    }
   case  move_with_obj:
     state = callServicePreMove(drop_off_pose_name) ? drop_obj : error;
     break;
   case  drop_obj:
-    state = callServiceGripperMove(50,100) ? home : error;
+    state = callServiceGripperMove(100,100) ? home : error;
     break;
   case  home:
     state = callServicePreMove(home_pose_name) ? ready : error;

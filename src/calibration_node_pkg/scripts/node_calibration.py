@@ -27,7 +27,7 @@ class CalibrationNode():
 
         self.img_path = "../data/"
         
-        self.pose_list = ["cali_0","cali_1","cali_2","cali_3","cali_4","cali_5","cali_6","cali_7","cali_8","cali_9","cali_10","cali_11","cali_12","cali_13","cali_14","cali_15","cali_16","cali_17","cali_18"]
+        self.pose_list = ["cali_0","cali_1","cali_2","cali_3","cali_4","cali_5","cali_6","cali_7","cali_8","cali_9","cali_10","cali_11","cali_12","cali_13","cali_14","cali_15","cali_16","cali_17","cali_18","cali_19","cali_20","cali_21","cali_22"]
         
         rospy.wait_for_service("GET/tcp_pose_srv")
         self.get_tcp = rospy.ServiceProxy("GET/tcp_pose_srv", CurrTCPPose)

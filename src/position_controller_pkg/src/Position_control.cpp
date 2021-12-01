@@ -15,7 +15,7 @@ Position_control::Position_control()
     p2p_service = n.serviceClient<ur_robot_pkg::p2p_cmove>("/SET/p2p_Cmove_srv");
 
     is_not_time_out = ros::service::waitForService("GET/robot_state_srv", max_waiting_time);
-    if(!is_not_time_out)  
+    if(!is_not_time_out)
     {
         std::cerr<<"TIMEOUT!!"<<std::endl;
     }
@@ -29,11 +29,17 @@ Position_control::Position_control()
 bool Position_control::position_controller(position_controller_pkg::Tcp_move::Request &req, position_controller_pkg::Tcp_move::Response  &res)
 {
 	// Only for viewving progess in the terminal
-	ROS_INFO("position controller ");
-    ur_robot_pkg::p2p_cmove::Response response;
-    int result = move2Pose(req,response);
-
-    return result;
+  // Only for viewving progess in the terminal
+  ur_robot_pkg::p2p_cmove::Response response;
+  int result = move2Pose(req,response);
+  res.succes = result; // We did not return/update/set a response :o
+  if (res.succes== SUCCESS)
+  {
+    return true;
+  }
+  else{
+    return false;
+  }
 }
 
 bool Position_control::move2DefPos(position_controller_pkg::Pre_def_pose::Request &req, position_controller_pkg::Pre_def_pose::Response &res)
@@ -111,8 +117,13 @@ int Position_control::move2Pose(position_controller_pkg::Tcp_move::Request &req,
     srv.request.pose = pose_msgs;
     srv.request.move_async = false;
     suc_rob_move = p2p_service.call(srv);
-    if (suc_rob_move)
-        return SERVICE_NOT_SUCC_COMPLETED;
+    if (!suc_rob_move)
+        return USUCCESSFUL_SERVICE_CALL;
+
+    if (!srv.response.succes)
+    {
+      return SERVICE_UNSUCCSESSFUL;
+    }
 
     res = srv.response;
     suc_resp = res.succes;
@@ -120,6 +131,7 @@ int Position_control::move2Pose(position_controller_pkg::Tcp_move::Request &req,
         return SUCCESS;
     return SERVICE_NOT_SUCC_COMPLETED;
 }
+
 
 int Position_control::getRobState()
 {

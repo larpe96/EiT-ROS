@@ -19,6 +19,7 @@ class Robot(RTDEControl, RTDEReceive, RTDEIO):
         RTDEControl.__init__(self, _ip)
         RTDEIO.__init__(self, _ip,)
         RTDEReceive.__init__(self, _ip,frequency = -1.0, variables = [], verbose = False, use_upper_range_registers = False)
+
         self.ip = _ip
 
     def cb_test(self, req):
@@ -87,11 +88,16 @@ class Robot(RTDEControl, RTDEReceive, RTDEIO):
             return b_succes, "TCP Offset changed"
         else:
             return b_succes, "Unable to change TCP Offset"
+
+
+    def cb_get_robot_ip(self, req):
+        return True, self.ip
         
 
 class Servicenode(Robot):
     def __init__(self, _ip):
         self.robot = Robot(_ip)
+        print("Successfully connected to the robot")
         rospy.init_node('UR_robot_interface_node', anonymous=True)
         self.init_serivices()
 
@@ -104,6 +110,7 @@ class Servicenode(Robot):
         srv_rob_state = rospy.Service("GET/robot_state_srv", RobState, self.robot.cb_get_RobState)
         srv_Tcp_pose = rospy.Service("GET/tcp_pose_srv", CurrTCPPose, self.robot.cb_get_TCP_Pose)
         srv_set_TCP_offset = rospy.Service("SET/tcp_offset_srv", set_TCP_offset, self.robot.cb_set_TCP_offset)
+        srv_get_rob_ip = rospy.Service("GET/robot_ip", Trigger, self.robot.cb_get_robot_ip)
         rospy.spin()
 
 
