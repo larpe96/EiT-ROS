@@ -1,0 +1,3 @@
+<launch>
+	<node pkg="enviroment_controller_pkg" name="envir_control_Test" type="enviroment_controller_pkg" output="screen"/>
+</launch>

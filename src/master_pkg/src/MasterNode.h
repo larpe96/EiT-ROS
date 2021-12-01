@@ -17,6 +17,8 @@
 #include "position_controller_pkg/Tcp_move.h"
 #include "position_controller_pkg/Pre_def_pose.h"
 
+#include "enviroment_controller_pkg/module_poses_srv.h"
+
 #include "master_pkg/system_state_srv.h"
 #include "master_pkg/gripper_Move.h"
 #include "master_pkg/gripper_Conf.h"
@@ -60,6 +62,7 @@ protected:
   bool callServiceGripperGrasp(float width,float speed);
   bool callServiceGripperSetForce(float force);
   bool callServicePreMove(std::string pose_name);
+  bool callServiceObjDropOff(std::string obj_type);
 
 
 
@@ -81,8 +84,11 @@ protected:
   ros::ServiceClient tcp_control_client;
   ros::ServiceClient tcp_pre_def_control_client;
 
+  ros::ServiceClient drop_off_poses_client;
+
   ros::ServiceServer system_state_server;
   ros::ServiceServer init_grasp_seq_server;
+  
 
 
   State state = init;
