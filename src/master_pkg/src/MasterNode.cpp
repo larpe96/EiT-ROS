@@ -107,7 +107,6 @@ int MasterNode::setupServices()
     return 0;
   }
 
-
   //client services
   pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
   tcp_control_client = n.serviceClient<position_controller_pkg::Tcp_move>("move2_pos_srv");
