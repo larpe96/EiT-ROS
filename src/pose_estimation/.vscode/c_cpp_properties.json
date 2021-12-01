@@ -1,0 +1,21 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/mdn/bor/EiT-ROS/devel/include/**",
+        "/home/mdn/bor/catkin_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/mdn/bor/EiT-ROS/src/pose_estimation/include/**",
+        "/home/mdn/bor/catkin_ws/src/universal_robot/ur_kinematics/include/**",
+        "/home/mdn/bor/EiT-ROS/src/wsg50-ros-pkg/wsg_50_driver/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

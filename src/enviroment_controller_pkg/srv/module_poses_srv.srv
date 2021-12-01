@@ -1,0 +1,5 @@
+string obj_type
+---
+bool success
+geometry_msgs/Pose drop_off_pose
+geometry_msgs/Pose approach_pose
