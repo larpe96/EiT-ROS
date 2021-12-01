@@ -16,7 +16,6 @@ build_isolated/
 devel/
 /.vscode/
 *.swp
-*.cc
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
