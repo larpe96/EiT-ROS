@@ -17,6 +17,8 @@
 #include "position_controller_pkg/Tcp_move.h"
 #include "position_controller_pkg/Pre_def_pose.h"
 
+#include "enviroment_controller_pkg/module_poses_srv.h"
+
 #include "master_pkg/system_state_srv.h"
 #include "master_pkg/gripper_Move.h"
 #include "master_pkg/gripper_Conf.h"
@@ -24,7 +26,7 @@
 #define home_pose_name  "pose_2"
 #define grasp_pose_name "pose_0"
 #define approach_pose_name "pose_1"
-#define drop_off_pose_name "pose_3"
+#define drop_off_pose_name "pose_99"
 
 enum State
 {
@@ -35,6 +37,7 @@ enum State
   approach_pose,
   move_to_pose,
   grasp_obj,
+  deproach_pose,
   move_with_obj,
   drop_obj,
   home
@@ -54,11 +57,12 @@ public:
 
 protected:
   int callServicePoseEstimate();
-  bool callServiceTcpMove();
+  bool callServiceTcpMove(geometry_msgs::Pose);
   bool callServiceGripperMove(float width,float speed);
   bool callServiceGripperGrasp(float width,float speed);
   bool callServiceGripperSetForce(float force);
   bool callServicePreMove(std::string pose_name);
+  bool callServiceObjDropOff(std::string obj_type);
 
 
 
@@ -80,14 +84,17 @@ protected:
   ros::ServiceClient tcp_control_client;
   ros::ServiceClient tcp_pre_def_control_client;
 
+  ros::ServiceClient drop_off_poses_client;
+
   ros::ServiceServer system_state_server;
   ros::ServiceServer init_grasp_seq_server;
+  
 
 
   State state = init;
   ros::NodeHandle n;
-  const char *state_name[10] = { "error","init", "ready", "get_pose","approach_pose",
-                            "move_to_pose","grasp_obj", "move_with_obj",
+  const char *state_name[11] = { "error","init", "ready", "get_pose","approach_pose",
+                            "move_to_pose","grasp_obj", "deproach_pose","move_with_obj",
                             "drop_obj", "home"};
 
   geometry_msgs::Pose obj_pose;

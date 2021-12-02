@@ -1,6 +1,13 @@
 # Dirs
 fmauch_universal_robot/
 Universal_Robots_ROS_Driver/
+.vscode-server/
+.ros/
+.config/
+.rviz
+.gnupg/
+.ssh/
+.local/
 
 src/CMakeLists.txt
 .catkin_workspace
@@ -9,11 +16,11 @@ build_isolated/
 devel/
 /.vscode/
 *.swp
-*.cc
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+*.eit
 
 # C extensions
 *.so
@@ -143,4 +150,5 @@ src/pose_estimation/.vscode/settings.json
 
 .catkin_tools/
 /logs
+
 src/pose_estimation/TEST/

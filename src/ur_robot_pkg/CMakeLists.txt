@@ -64,6 +64,7 @@ add_service_files(
   jointQs.srv
   RobState.srv
   CurrTCPPose.srv
+  set_TCP_offset.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -170,6 +171,7 @@ include_directories(
 catkin_install_python(PROGRAMS
    scripts/ur_robot_node.py
    scripts/test_srv.py
+   scripts/ur_recieve_node.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
