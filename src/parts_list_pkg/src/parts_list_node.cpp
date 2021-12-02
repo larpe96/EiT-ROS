@@ -17,6 +17,7 @@ int main(int argc, char** argv)
   // Setup parts list object
   std::string partslist_file = "../EiT-ROS/src/parts_list_pkg/etc/parts_file.txt"; 
   bill.loadPartsList(partslist_file);
+  ROS_INFO_STREAM("Number of objects in parts list: " + std::to_string(bill.getPartsList().size()));
 
   //Setup ros Node/service
   ros::init(argc, argv, "parts_list_server");
@@ -24,4 +25,5 @@ int main(int argc, char** argv)
   ros::ServiceServer service = n.advertiseService("missing_parts_srv", MP_service_handler);
   ROS_INFO("Ready to find missing parts");
   ros::spin();
+
 }
