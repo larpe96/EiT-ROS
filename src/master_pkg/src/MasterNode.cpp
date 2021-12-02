@@ -216,7 +216,7 @@ int MasterNode::callServicePoseEstimate()
 
     if(pose_estim_client.call(msg))
     {
-        if (msg.response.rel_object_poses.poses.size() == 0)
+        if (msg.response.rel_object_poses.poses.size() == 0 or msg.response.rel_object_ids.size() == 0 )
           {
             return 2;
           }
@@ -224,6 +224,8 @@ int MasterNode::callServicePoseEstimate()
         {
           obj_pose = msg.response.rel_object_poses.poses[0];
           obj_id = msg.response.rel_object_ids[0];
+
+          std::cout << obj_id << " " <<obj_pose<< std::endl;
           return 1;
         }
     }
@@ -313,6 +315,7 @@ void MasterNode::stateLoop()
   case  get_pose:
     {
       int res = 0;
+      std::cout << "callServicePoseEstimate"<< std::endl;
       res = callServicePoseEstimate();
       if( res == 1 )
       {
@@ -330,6 +333,7 @@ void MasterNode::stateLoop()
     }
   case approach_pose:
     {
+      std::cout << "callServiceTcpMove"<< std::endl;
       int res = 0;
       /*obj_pose.orientation.x = 0.17;
       obj_pose.orientation.y = -0.985;
@@ -395,14 +399,13 @@ void MasterNode::stateLoop()
     }
   case  move_to_approach_drop_off:
     {
-      int res = callServiceObjDropOff("obj_1");
+      int res = callServiceObjDropOff(obj_id);
       if (res == 0)
       {
         state = error;
       }
       else
       {
-        std::cout << approach_drop_off_pose << std::endl;
         state = callServiceTcpMove(approach_drop_off_pose) ? move_to_drop_off : error;
       }
       break;
