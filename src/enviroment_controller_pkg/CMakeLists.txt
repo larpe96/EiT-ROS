@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(master_pkg)
+project(enviroment_controller_pkg)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,15 +8,21 @@ project(master_pkg)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  pose_estimation
-  position_controller_pkg
-  enviroment_controller_pkg
   roscpp
-  std_msgs
-  sensor_msgs
   geometry_msgs
+  std_msgs
   message_generation
   std_srvs
+  sensor_msgs
+)
+
+
+set(SOURCES
+  src/main.cpp
+  src/Module.cpp
+  src/AssemblyKit.cpp
+  src/EnviromentControllerNode.cpp
+  src/Matrix.cpp
 )
 
 ################################################
@@ -24,16 +30,14 @@ find_package(catkin REQUIRED COMPONENTS
 ################################################
 
 ## Generate messages in the 'msg' folder
-add_message_files(FILES gripper_Cmd.msg gripper_Status.msg)
+# add_message_files(
+#   FILES 
+# )
 
 
-## Generate services in the 'srv' folder
 add_service_files(
 FILES
-system_state_srv.srv
-gripper_Conf.srv 
-gripper_Incr.srv 
-gripper_Move.srv
+module_poses_srv.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -47,6 +51,7 @@ gripper_Move.srv
 ################################################
 
 
+#  generate_messages(
  generate_messages(
    DEPENDENCIES
    std_msgs
@@ -78,16 +83,11 @@ include_directories(
 )
 
 
-#############
-## Install ##
-#############
-
-
 
 #############
 ## Testing ##
 #############
 
-add_executable(master src/main.cpp src/MasterNode.cpp)
-target_link_libraries(master ${catkin_LIBRARIES})
-#add_dependencies(master master_pkg_gencpp)
+add_executable(${PROJECT_NAME} ${SOURCES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+#add_dependencies(enviroment_controller enviroment_controller_pkg_gencpp)

@@ -71,11 +71,17 @@ int MasterNode::setupServices()
 {
   int setupBool = 1;
 
+
   setupBool = ros::service::waitForService("pose_est", 10);
   if (setupBool == 0)
   {
     return 0;
    }
+  // setupBool = ros::service::waitForService("get_module_drop_off_poses", 10);
+  // if (setupBool == 0)
+  // {
+  //   return 0;
+  // }
   setupBool = ros::service::waitForService("move2_pos_srv", 10);
   if (setupBool == 0)
   {
@@ -112,10 +118,31 @@ int MasterNode::setupServices()
   gripper_grasp_client = n.serviceClient<master_pkg::gripper_Move>("wsg_50_driver/grasp");
   gripper_set_force_client = n.serviceClient<master_pkg::gripper_Conf>("wsg_50_driver/set_force");
 
+  //drop_off_poses_client = n.serviceClient<enviroment_controller_pkg::module_poses_srv>("get_module_drop_off_poses");
+
   //server services
   system_state_server = n.advertiseService("system_state", &MasterNode::sendSystemState,this);
   init_grasp_seq_server = n.advertiseService("init_grasp_seq", &MasterNode::initGraspSeq,this);
   return 1;
+}
+
+bool MasterNode::callServiceObjDropOff(std::string obj_type1)
+{
+    enviroment_controller_pkg::module_poses_srv srv;
+    srv.request.obj_type = obj_type1;
+
+    if(!drop_off_poses_client.call(srv))
+    {
+        ROS_ERROR("Failed to call service: %s", drop_off_poses_client.getService().c_str());
+        return 0;
+    }
+
+    if(srv.response.success != 1)
+    {
+     ROS_ERROR("Generating an drop off pose failed.");
+     return 0;
+    }
+   return 1;
 }
 
 bool MasterNode::callServiceGripperMove(float width,float speed)
@@ -276,7 +303,10 @@ void MasterNode::stateLoop()
     }
     break;
   case ready:
-    break;
+    {
+      //std::cout << callServiceObjDropOff("type1")<< std::endl;
+      break;
+    }
   case  get_pose:
     {
       int res = 0;
