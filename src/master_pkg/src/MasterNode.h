@@ -100,7 +100,7 @@ protected:
                             "move_to_drop_off","drop_obj","move_to_deproach_drop_off", "home"};
 
   geometry_msgs::Pose obj_pose;
-  std::string obj_type;
+  std::string obj_ids;
   
   geometry_msgs::Pose approach_drop_off_pose;
   geometry_msgs::Pose drop_off_pose;

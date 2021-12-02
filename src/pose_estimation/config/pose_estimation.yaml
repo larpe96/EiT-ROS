@@ -4,6 +4,7 @@ input_topic_rgb: /camera/rgb/image_raw
 input_topic_depth: /camera/depth/image_raw
 output_topic: /pose_est
 
+
 threshold_binary: 12
 erosion_size: 1
 dilation_size: 3

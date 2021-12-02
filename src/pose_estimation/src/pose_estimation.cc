@@ -101,12 +101,45 @@ bool PoseEstimation::Estimate_pose(pose_estimation::pose_est_srv::Request   &req
 		posearray.poses.push_back(p);
 	}
 	res.rel_object_poses = posearray;
+  
+  res.rel_object_ids = object_ids;
 
   std::string out_str = "Number of detected objects: " + std::to_string(object_points.size());
 	ROS_INFO_STREAM(out_str);
 	return true;
 }
 
+bool PoseEstimation::callClassifier(std::vector<cv::RotatedRect> rot_rects, std::vector<std::string> &labels, std::vector<int> &mask)
+{
+  classifier_pkg::classify_detections::Request cds_req;
+  classifier_pkg::classify_detections::Response cds_res;
+
+  
+  cds_req.header.stamp = ros::Time::now();
+  for (cv::RotatedRect& r:rot_rects)
+  {
+    classifier_pkg::Classification_params param;
+    param.width = r.size.width;
+    param.height = r.size.height;
+    cds_req.params.push_back(param);
+  }
+
+  ROS_INFO_STREAM("callClassifier");
+
+  if(classify_detections.call(cds_req, cds_res))
+  {
+    ROS_INFO_STREAM("callClassifier");
+
+    labels = cds_res.names;
+    mask = cds_res.mask;
+
+    std::string n_classified_obj = "Number of classified objects: " + std::to_string(labels.size());
+    ROS_INFO_STREAM(n_classified_obj);
+    
+    return true;
+  }
+  return false;
+}
 
 std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth, cv::Mat &img_binary)
 {
@@ -125,6 +158,23 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
 
   // Find rotated rects
   std::vector<cv::RotatedRect> rot_rects = detector::FindRotatedRects(contours2);
+
+  // Classify detections
+  std::vector<std::string> labels;
+  std::vector<int> mask;
+  bool res = callClassifier(rot_rects, labels, mask);
+
+  // Push correctly classified objects to the output vector
+  std::vector<std::string> new_objects;
+  for (int i = 0; i < mask.size(); i++)
+  {
+    if (mask[i] == true)
+    {
+      //object_ids.push_back(labels[i]);
+      new_objects.push_back(labels[i]);
+    }
+  }
+  object_ids = new_objects;
 
   // Save detections to file
   detector::SaveToFile(img_rgb, img_depth, rot_rects);
@@ -176,10 +226,10 @@ void PoseEstimation::OnDynamicReconfigure(PoseEstimation::DynamicReconfigureType
   std::cout << "reconfig" << std::endl;
 
   // Subscribers
-
   bool resubscribe = !camera_sync_ ||
   subscriber_rgb_->getTopic() != config_.input_topic_rgb ||
   subscriber_depth_->getTopic() != config_.input_topic_depth;
+  
   if (resubscribe)
   {
     subscriber_rgb_ = std::make_shared<decltype(subscriber_rgb_)::element_type>(nh_, config_.input_topic_rgb, 1);
@@ -189,9 +239,7 @@ void PoseEstimation::OnDynamicReconfigure(PoseEstimation::DynamicReconfigureType
             *subscriber_rgb_,
             *subscriber_depth_
           );
-
   camera_sync_->registerCallback(boost::bind(&PoseEstimation::OnImage, this, _1, _2));
-
   }
 
   // Service

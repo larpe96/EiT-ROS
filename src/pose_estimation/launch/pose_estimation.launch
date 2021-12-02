@@ -4,8 +4,9 @@
   </node>
 
   <include file="$(find pose_estimation)/launch/openni2.launch"></include>
+  <include file="$(find classifier_pkg)/launch/classifier_node.launch"/>
 
-  <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" respawn="true"></node>
+  <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" respawn="true"></node> -->
 
 
 </launch>

@@ -223,7 +223,7 @@ int MasterNode::callServicePoseEstimate()
         else
         {
           obj_pose = msg.response.rel_object_poses.poses[0];
-                                                      //obj_type = msg.response. /* TO DO INSERT MSG TYPE HERE!!!!! */
+          obj_id = msg.response.rel_object_ids[0];
           return 1;
         }
     }
