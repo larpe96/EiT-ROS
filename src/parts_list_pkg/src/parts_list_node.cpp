@@ -15,7 +15,7 @@ int main(int argc, char** argv)
 {
   
   // Setup parts list object
-  std::string partslist_file = "../EiT-ROS/src/parts_list_pkg/etc/parts_file.txt"; 
+  std::string partslist_file = "../workspace/src/parts_list_pkg/etc/parts_file.txt"; 
   bill.loadPartsList(partslist_file);
   ROS_INFO_STREAM("Number of objects in parts list: " + std::to_string(bill.getPartsList().size()));
 
