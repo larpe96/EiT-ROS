@@ -21,6 +21,7 @@ devel/
 __pycache__/
 *.py[cod]
 *$py.class
+*.eit
 
 # C extensions
 *.so
@@ -151,8 +152,4 @@ src/pose_estimation/.vscode/settings.json
 .catkin_tools/
 /logs
 
-.bash_history
-.gitconfig
-
-src/pose_estimation/TEST/build-TEST_DETECTOR-Desktop-Debug/
-src/pose_estimation/TEST/TEST_DETECTOR/CMakeLists.txt.user
+src/pose_estimation/TEST/
