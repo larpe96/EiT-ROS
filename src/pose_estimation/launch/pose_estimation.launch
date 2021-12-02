@@ -1,6 +1,11 @@
 <launch>
-  <node name="pose_estimation" pkg="pose_estimation" type="pose_estimation_node" output="screen" respawn="true"></node>
+  <node name="pose_estimation" pkg="pose_estimation" type="pose_estimation_node" output="screen" respawn="true">
+    <rosparam command="load" file="$(find pose_estimation)/config/pose_estimation.yaml" />
+  </node>
 
-  <include file="$(find openni2_launch)/launch/openni2.launch"></include>
+  <include file="$(find pose_estimation)/launch/openni2.launch"></include>
+
+  <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" respawn="true"></node>
+
 
 </launch>
