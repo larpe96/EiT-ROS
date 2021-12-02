@@ -165,13 +165,16 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
   bool res = callClassifier(rot_rects, labels, mask);
 
   // Push correctly classified objects to the output vector
+  std::vector<std::string> new_objects;
   for (int i = 0; i < mask.size(); i++)
   {
     if (mask[i] == true)
     {
-      object_ids.push_back(labels[i]);
+      //object_ids.push_back(labels[i]);
+      new_objects.push_back(labels[i]);
     }
   }
+  object_ids = new_objects;
 
   // Save detections to file
   detector::SaveToFile(img_rgb, img_depth, rot_rects);
