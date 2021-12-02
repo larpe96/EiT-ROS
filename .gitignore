@@ -8,6 +8,7 @@ Universal_Robots_ROS_Driver/
 .gnupg/
 .ssh/
 .local/
+data/
 
 src/CMakeLists.txt
 .catkin_workspace

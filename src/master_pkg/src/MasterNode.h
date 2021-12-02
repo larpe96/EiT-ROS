@@ -98,6 +98,7 @@ protected:
                             "drop_obj", "home"};
 
   geometry_msgs::Pose obj_pose;
+  std::vector<std::string> obj_ids;
 };
 
 #endif // MASTER_NODE_H

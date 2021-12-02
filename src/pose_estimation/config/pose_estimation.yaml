@@ -4,10 +4,11 @@ input_topic_rgb: /camera/rgb/image_raw
 input_topic_depth: /camera/depth/image_raw
 output_topic: /pose_est
 
+
 threshold_binary: 12
 erosion_size: 1
 dilation_size: 3
-mask_x: 0 #235
+mask_x: 129 #235
 mask_y: 0 #220
-mask_w: 640 #285
+mask_w: 511 #285
 mask_h: 480 #145
