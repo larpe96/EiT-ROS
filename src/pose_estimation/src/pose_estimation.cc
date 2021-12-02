@@ -58,6 +58,23 @@ void PoseEstimation::OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, cons
   cv::waitKey(1);
 }
 
+//Remove of of bounds Detections
+geometry_msgs::PoseArray Remove_OOB_poses(geometry_msgs::PoseArray posearray, std::pair<int, int> xlim, std::pair<int, int> ylim, std::pair<int, int> zlim) 
+{
+    geometry_msgs::PoseArray filtered_poses; 
+
+    for(int i = 0; i < posearray.poses.size(); i++) 
+    {
+        double x = posearray.poses[i].position.x; 
+        double y = posearray.poses[i].position.y; 
+        double z = posearray.poses[i].position.z; 
+        if(x < xlim.first || x > xlim.second || y < ylim.first || y > ylim.second || z < zlim.first || z > zlim.second)
+          continue; 
+        filtered_poses.poses.push_back(posearray.poses[i]); 
+    }
+
+    return filtered_poses; 
+}
 
 bool PoseEstimation::Estimate_pose(pose_estimation::pose_est_srv::Request   &req,
 		                pose_estimation::pose_est_srv::Response  &res)
