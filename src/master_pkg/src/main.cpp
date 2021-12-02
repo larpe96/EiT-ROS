@@ -17,7 +17,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "master");
   MasterNode node;
   signal(SIGINT, mySigintHandler); 
-  ros::Rate r(1);                                                                                                                                             
+  ros::Rate r(10);                                                                                                                                             
   while(run_loop)                                                                                                                                               
   {		 ros::spinOnce();                                                                                                                                                                                                                                                                    
           node.stateLoop();

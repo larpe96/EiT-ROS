@@ -3,33 +3,33 @@
     {
     "1":
 		{
-    	"module_type": "type1",
+    	"module_type": "obj_1",
 		"module_dropoff": {
 			"Translation":{
 				"x":0.0,
 				"y":0.0,
 				"z":0.1},
-			"Orientation":{
-				"x":0.0,
+			"Orientation":{	
+				"x":1.0,
 				"y":0.0,
-				"z":0.3826834,
-				"w":0.9238795}
+				"z":0.0,
+				"w":0.0}
 				},
 		"module_approach_pose": {
 			"Translation":{
 				"x":0.0,
 				"y":0.0,
-				"z":0.3},
+				"z":0.25},
 			"Orientation":{
-				"x":0.0,
+				"x":1.0,
 				"y":0.0,
-				"z":0.3826834,
-				"w":0.9238795}
+				"z":0.0,
+				"w":0.0}
 				}
     	},
 	"2":
 		{
-    	"module_type": "type2",
+    	"module_type": "obj_2",
 		"module_dropoff": {
 			"Translation":{
 				"x":0.0,
@@ -55,7 +55,7 @@
     	},
 	"3":
     	{
-    	"module_type": "type3",
+    	"module_type": "obj_3",
 		"module_dropoff": {
 			"Translation":{
 				"x":0.0,

@@ -47,6 +47,7 @@ bool EnviromentControllerNode::sendModulePoses(enviroment_controller_pkg::module
     res.approach_pose = approach_pose;
 
     std::cout << req.obj_type << std::endl;
+    std::cout<< "approach_pose" << approach_pose << std::endl;
     std::cout<< "drop_off_pose" << drop_off_pose << std::endl;
     
     return true;
