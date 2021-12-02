@@ -1,0 +1,28 @@
+{
+  "object_types":
+  {
+    "Plug" :
+    {
+      "Translation":
+      {
+        "z": -1
+      },
+      "Gripper":
+      {
+        "open_width": 22
+      }
+    },
+
+    "Valve" :
+    {
+      "Translation":
+      {
+        "z": -0.5
+      },
+      "Gripper":
+      {
+        "open_width": 22
+      }
+    }
+  }
+}
