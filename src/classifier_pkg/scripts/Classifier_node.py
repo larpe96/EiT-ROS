@@ -25,17 +25,17 @@ class Classifier_ros_node:
             print("data: ", data)
             print("prob: ", prob)
             print("label: ", label)
-            if param.width < 15 and param.height < 15:
-                mask = False
-                class_label = "False detection"
-            elif 1 >= prob > 1e-4:
-                mask = True
-                class_label = "obj_"+str(label)
-            else:
-                mask = False
-                class_label = "False detection"
-            names.append(class_label)
-            masks.append(mask)
+            if param.width > 15 and param.height > 15:
+                #mask = False
+                #class_label = "False detection"
+                if 1 >= prob > 1e-4:
+                    mask = True
+                    class_label = "obj_"+str(label)
+                else:
+                    mask = False
+                    class_label = "False detection"
+                names.append(class_label)
+                masks.append(mask)
 
         print(names)
         print(masks)
