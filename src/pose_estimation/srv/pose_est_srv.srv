@@ -1,2 +1,3 @@
 ---
 geometry_msgs/PoseArray rel_object_poses
+string[] rel_object_ids

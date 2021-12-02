@@ -9,6 +9,8 @@ Universal_Robots_ROS_Driver/
 .ssh/
 .local/
 .vscode
+data/
+
 
 src/CMakeLists.txt
 .catkin_workspace
@@ -152,8 +154,4 @@ src/pose_estimation/.vscode/settings.json
 .catkin_tools/
 /logs
 
-.bash_history
-.gitconfig
-
-src/pose_estimation/TEST/build-TEST_DETECTOR-Desktop-Debug/
-src/pose_estimation/TEST/TEST_DETECTOR/CMakeLists.txt.user
+src/pose_estimation/TEST/

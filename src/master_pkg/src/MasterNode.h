@@ -107,6 +107,8 @@ protected:
   geometry_msgs::Pose pose_pickup_approach;
   float gripper_open_width;
   std::string object_id;
+
+  std::vector<std::string> obj_ids;
 };
 
 #endif // MASTER_NODE_H
