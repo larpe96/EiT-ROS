@@ -17,13 +17,15 @@ class Classifier_ros_node:
     def cb_classify_detections(self,req):
         names = []
         masks = []
-
         
         for param in req.params:
             data = [param.width, param.height]
             label, prob = self.cf.classify(data)
             mask = False
-            if 1<= prob > 1e-4 :
+            print("data: ", data)
+            print("prob: ", prob)
+            print("label: ", label)
+            if 1>= prob > 1e-4 :
                 mask = True
                 class_label = "obj_"+str(label)
             else:
@@ -32,8 +34,9 @@ class Classifier_ros_node:
             names.append(class_label)
             masks.append(mask)
 
-        print("HEY")
-
+        print(names)
+        print(masks)
+        
         return names, masks
 
     

@@ -3,5 +3,6 @@
   <include file="$(find wsg_50_driver)/launch/wsg_50_tcp.launch"/>
   <include file="$(find position_controller_pkg)/launch/position_controller.launch"/>
   <include file="$(find pose_estimation)/launch/pose_estimation.launch"/>
+  <include file="$(find classifier_pkg)/launch/classifier_node.launch"/>
   <node name="master_node" pkg="master_pkg" type="master" output="screen"/>
 </launch>

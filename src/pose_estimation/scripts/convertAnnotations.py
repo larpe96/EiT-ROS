@@ -12,6 +12,7 @@ path = "../data/V1/2021-11-24_v1/"
 output_file_name = "matlab_data_v1.csv"
 output_folder = "data_vis_v1"
 
+
 #os.mkdir(output_folder)
 
 all_files = os.listdir(path)

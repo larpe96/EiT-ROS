@@ -54,7 +54,7 @@ class PoseEstimation
     /// ROS service
     ros::ServiceServer service_;
     /// ROS service handle <- for classification
-    ros::ServiceClient classify_detections = nh_.serviceClient<classifier_pkg::classify_detections>("classify_detections_srv");
+    ros::ServiceClient classify_detections = nh_.serviceClient<classifier_pkg::classify_detections>("/classify_detections_srv");
     /// Camera synchronizer policy
     using CameraSyncPolicy = message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image>;
     /// Camera synchronizer
@@ -77,6 +77,9 @@ class PoseEstimation
     cv::Mat img_diff_masked;
     cv::Mat img_diff;
     cv::Mat img_binary;
+
+    std::vector<std::string> object_ids;
+    //std::string object_ids[100] = {};
 
     float f_y = 574.0;
     float f_x = 574.0;
