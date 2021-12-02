@@ -123,6 +123,9 @@ int MasterNode::setupServices()
   gripper_grasp_client = n.serviceClient<master_pkg::gripper_Move>("wsg_50_driver/grasp");
   gripper_set_force_client = n.serviceClient<master_pkg::gripper_Conf>("wsg_50_driver/set_force");
 
+  drop_off_poses_client = n.serviceClient<enviroment_controller_pkg::module_poses_srv>("get_module_drop_off_poses");
+  pickup_db_client = n.serviceClient<pickup_db::pickup_db_srv>("pickup_db");
+
   //server services
   system_state_server = n.advertiseService("system_state", &MasterNode::sendSystemState,this);
   init_grasp_seq_server = n.advertiseService("init_grasp_seq", &MasterNode::initGraspSeq,this);
