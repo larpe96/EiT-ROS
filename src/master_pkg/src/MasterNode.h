@@ -23,6 +23,8 @@
 #include "master_pkg/gripper_Move.h"
 #include "master_pkg/gripper_Conf.h"
 
+#include "pickup_db/pickup_db_srv.h"
+
 #define home_pose_name  "pose_2"
 #define grasp_pose_name "pose_0"
 #define approach_pose_name "pose_1"
@@ -63,6 +65,7 @@ protected:
   bool callServiceGripperSetForce(float force);
   bool callServicePreMove(std::string pose_name);
   bool callServiceObjDropOff(std::string obj_type);
+  bool callServicePickupDB(std::string obj_type, geometry_msgs::Pose pose_estimated);
 
 
 
@@ -71,7 +74,7 @@ protected:
 
   bool sendSystemState(master_pkg::system_state_srv::Request  &req,
                                 master_pkg::system_state_srv::Response &res);
-  
+
   bool initGraspSeq(std_srvs::Trigger::Request  &req,
                                 std_srvs::Trigger::Response &res);
 
@@ -88,7 +91,9 @@ protected:
 
   ros::ServiceServer system_state_server;
   ros::ServiceServer init_grasp_seq_server;
-  
+
+  ros::ServiceClient pickup_db_client;
+
 
 
   State state = init;
@@ -98,6 +103,10 @@ protected:
                             "drop_obj", "home"};
 
   geometry_msgs::Pose obj_pose;
+  geometry_msgs::Pose pose_pickup;
+  geometry_msgs::Pose pose_pickup_approach;
+  float gripper_open_width;
+  std::string object_id;
 };
 
 #endif // MASTER_NODE_H
