@@ -1,11 +1,11 @@
 {
   "object_types":
   {
-    "Plug" :
+    "obj_1" :
     {
       "Translation":
       {
-        "z": -1
+        "z": -0.020
       },
       "Gripper":
       {
@@ -13,11 +13,35 @@
       }
     },
 
-    "Valve" :
+    "obj_2" :
     {
       "Translation":
       {
-        "z": -0.5
+        "z": -0.024
+      },
+      "Gripper":
+      {
+        "open_width": 22
+      }
+    },
+
+    "obj_3" :
+    {
+      "Translation":
+      {
+        "z": -0.020
+      },
+      "Gripper":
+      {
+        "open_width": 26.5
+      }
+    },
+
+    "obj_4" :
+    {
+      "Translation":
+      {
+        "z": -0.024
       },
       "Gripper":
       {
