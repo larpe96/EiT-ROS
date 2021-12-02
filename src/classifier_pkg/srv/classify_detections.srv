@@ -1,0 +1,5 @@
+std_msgs/Header header
+classifier_pkg/Classification_params[] params
+---
+string[] names
+int32[] mask

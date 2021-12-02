@@ -219,6 +219,7 @@ int MasterNode::callServicePoseEstimate()
         else
         {
           obj_pose = msg.response.rel_object_poses.poses[0];
+          obj_ids = msg.response.rel_object_ids;
           return 1;
         }
     }

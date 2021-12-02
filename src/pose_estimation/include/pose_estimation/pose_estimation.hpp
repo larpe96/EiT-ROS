@@ -1,9 +1,13 @@
 #pragma once
 
-#include <iostream>
-#include <vector>
-#include <dynamic_reconfigure/server.h>
+
+
+// Custom Services 
 #include "pose_estimation/pose_est_srv.h"
+#include "classifier_pkg/classify_detections.h"
+#include "classifier_pkg/Classification_params.h"
+
+// ROS
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
 #include <message_filters/subscriber.h>
@@ -11,11 +15,17 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <sensor_msgs/Image.h>
 #include "std_msgs/Bool.h"
+#include <ros/service_server.h>
+#include <dynamic_reconfigure/server.h>
+
+// STD includes
 #include <string>
 #include <ctime>
 #include <fstream>
-#include <ros/service_server.h>
+#include <iostream>
+#include <vector>
 
+// Headers
 #include <pose_estimation/detector.h>
 #include <pose_estimation/PoseEstimationConfig.h>
 
@@ -31,6 +41,7 @@ class PoseEstimation
     void Initialize(const ros::NodeHandle &nh);
     void OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, const sensor_msgs::ImageConstPtr& img_depth_msg);
     bool Estimate_pose(pose_estimation::pose_est_srv::Request   &req, pose_estimation::pose_est_srv::Response  &res);
+    bool callClassifier(std::vector<cv::RotatedRect> rot_rects, std::vector<std::string> &labels, std::vector<int> &mask);
     void getQuaternion(cv::Mat R, float Q[]);
     std::vector<cv::Mat> Detect(cv::Mat &img_rgb, cv::Mat &img_depth, cv::Mat &img_binary);
     void OnDynamicReconfigure(DynamicReconfigureType& config, uint32_t level);
@@ -42,6 +53,8 @@ class PoseEstimation
     ros::NodeHandle nh_;
     /// ROS service
     ros::ServiceServer service_;
+    /// ROS service handle <- for classification
+    ros::ServiceClient classify_detections = nh_.serviceClient<classifier_pkg::classify_detections>("/classify_detections_srv");
     /// Camera synchronizer policy
     using CameraSyncPolicy = message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image>;
     /// Camera synchronizer
@@ -64,6 +77,9 @@ class PoseEstimation
     cv::Mat img_diff_masked;
     cv::Mat img_diff;
     cv::Mat img_binary;
+
+    std::vector<std::string> object_ids;
+    //std::string object_ids[100] = {};
 
     float f_y = 574.0;
     float f_x = 574.0;
