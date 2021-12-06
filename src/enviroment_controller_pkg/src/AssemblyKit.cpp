@@ -95,7 +95,6 @@ geometry_msgs::Pose AssemblyKit::getModuleDropOffPose(int module_index)
     assembly_to_module.setTranslation(module_coordiante.x*0.05, module_coordiante.y*0.05, 0.0);
 
     TMatrix base_to_module = base_to_assembly_origo * assembly_to_module * modules[module_index].drop_off_pose;
-
     return  base_to_module.getPose();
 }
 

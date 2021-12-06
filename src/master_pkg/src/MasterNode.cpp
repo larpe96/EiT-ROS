@@ -323,11 +323,11 @@ void MasterNode::stateLoop()
       }
       else if(res == 0)
       {
-        state = get_pose;
+        state = error;
       }
       else
       {
-        state = get_pose;
+        state = ready;
       }
       break;
     }
@@ -420,7 +420,7 @@ void MasterNode::stateLoop()
     state = callServiceTcpMove(approach_drop_off_pose) ? home : error;
     break;
   case  home:
-    state = callServicePreMove(home_pose_name) ? ready : error;
+    state = callServicePreMove(home_pose_name) ? get_pose : error;
     break;
   default:
     ROS_ERROR("Master State is in error state");
