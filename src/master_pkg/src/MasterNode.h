@@ -41,8 +41,10 @@ enum State
   move_to_pose,
   grasp_obj,
   deproach_pose,
-  move_with_obj,
+  move_to_approach_drop_off,
+  move_to_drop_off,
   drop_obj,
+  move_to_deproach_drop_off,
   home
 };
 
@@ -101,9 +103,9 @@ protected:
 
   State state = init;
   ros::NodeHandle n;
-  const char *state_name[11] = { "error","init", "ready", "get_pose","approach_pose",
-                            "move_to_pose","grasp_obj", "deproach_pose","move_with_obj",
-                            "drop_obj", "home"};
+  const char *state_name[13] = { "error","init", "ready", "get_pose","approach_pose",
+                            "move_to_pose","grasp_obj", "deproach_pose" , "move_to_approach_drop_off",
+                            "move_to_drop_off","drop_obj","move_to_deproach_drop_off", "home"};
 
   geometry_msgs::Pose obj_pose;
   geometry_msgs::Pose pose_pickup;
@@ -111,6 +113,9 @@ protected:
   float gripper_open_width;
 
   std::vector<std::string> obj_ids;
+  
+  geometry_msgs::Pose approach_drop_off_pose;
+  geometry_msgs::Pose drop_off_pose;
 };
 
 #endif // MASTER_NODE_H

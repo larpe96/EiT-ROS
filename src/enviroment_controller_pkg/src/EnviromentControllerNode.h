@@ -12,6 +12,7 @@
 #include <geometry_msgs/Point.h>
 #include "std_srvs/Trigger.h"
 #include "enviroment_controller_pkg/module_poses_srv.h"
+#include "enviroment_controller_pkg/kit_info_srv.h"
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -39,11 +40,14 @@ protected:
                                 std_srvs::Trigger::Response &res);
   bool sendModulePoses(enviroment_controller_pkg::module_poses_srv::Request  &req,
                                 enviroment_controller_pkg::module_poses_srv::Response &res);
+  bool getKitInfo(enviroment_controller_pkg::kit_info_srv::Request  &req,
+                                enviroment_controller_pkg::kit_info_srv::Response &res);
   AssemblyKit assembly_kit;
   ros::NodeHandle n;
 
   ros::ServiceServer reset_kit_server;
   ros::ServiceServer get_module_poses_server;
+  ros::ServiceServer get_kit_info_server;
 
 
 

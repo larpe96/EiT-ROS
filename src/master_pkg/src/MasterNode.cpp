@@ -80,11 +80,11 @@ int MasterNode::setupServices()
   {
     return 0;
    }
-  // setupBool = ros::service::waitForService("get_module_drop_off_poses", 10);
-  // if (setupBool == 0)
-  // {
-  //   return 0;
-  // }
+  setupBool = ros::service::waitForService("get_module_drop_off_poses", 10);
+  if (setupBool == 0)
+  {
+    return 0;
+  }
   setupBool = ros::service::waitForService("move2_pos_srv", 10);
   if (setupBool == 0)
   {
@@ -157,6 +157,11 @@ bool MasterNode::callServiceObjDropOff(std::string obj_type1)
     {
      ROS_ERROR("Generating an drop off pose failed.");
      return 0;
+    }
+    else
+    {
+      drop_off_pose = srv.response.drop_off_pose;
+      approach_drop_off_pose = srv.response.approach_pose;
     }
    return 1;
 }
@@ -249,14 +254,16 @@ int MasterNode::callServicePoseEstimate()
 
     if(pose_estim_client.call(msg))
     {
-        if (msg.response.rel_object_poses.poses.size() == 0)
+        if (msg.response.rel_object_poses.poses.size() == 0 or msg.response.rel_object_ids.size() == 0 )
           {
             return 2;
           }
         else
         {
           obj_pose = msg.response.rel_object_poses.poses[0];
-          obj_ids[0] = msg.response.rel_object_ids[0];
+
+          obj_ids = msg.response.rel_object_ids;
+
           return 1;
         }
     }
@@ -362,7 +369,6 @@ void MasterNode::stateLoop()
     break;
   case ready:
     {
-      //std::cout << callServiceObjDropOff("type1")<< std::endl;
       break;
     }
   case  get_pose:
@@ -377,16 +383,17 @@ void MasterNode::stateLoop()
       }
       else if(res == 0)
       {
-        state = get_pose;
+        state = error;
       }
       else
       {
-        state = get_pose;
+        state = ready;
       }
       break;
     }
   case approach_pose:
     {
+      
       int res = 0;
       /*obj_pose.orientation.x = 0.17;
       obj_pose.orientation.y = -0.985;
@@ -396,6 +403,7 @@ void MasterNode::stateLoop()
       //geometry_msgs::Pose tcp_pose = obj_pose;
       //tcp_pose.position.z = tcp_pose.position.z + 0.1;
       res = callServiceTcpMove(pose_pickup_approach);
+
       if (res == 1)
       {
         state = move_to_pose;
@@ -442,7 +450,7 @@ void MasterNode::stateLoop()
       res = callServiceTcpMove(tcp_pose);
       if (res == 1)
       {
-        state = move_with_obj;
+        state = move_to_approach_drop_off;
       }
       else
       {
@@ -450,14 +458,30 @@ void MasterNode::stateLoop()
       }
       break;
     }
-  case  move_with_obj:
-    state = callServicePreMove(drop_off_pose_name) ? drop_obj : error;
+  case  move_to_approach_drop_off:
+    {
+      int res = callServiceObjDropOff(obj_ids[0]);
+      if (res == 0)
+      {
+        state = error;
+      }
+      else
+      {
+        state = callServiceTcpMove(approach_drop_off_pose) ? move_to_drop_off : error;
+      }
+      break;
+    }
+  case  move_to_drop_off:
+    state = callServiceTcpMove(drop_off_pose) ? drop_obj : error;
     break;
   case  drop_obj:
-    state = callServiceGripperMove(100,100) ? home : error;
+    state = callServiceGripperMove(100,100) ? move_to_deproach_drop_off : error;
+    break;
+  case  move_to_deproach_drop_off:
+    state = callServiceTcpMove(approach_drop_off_pose) ? home : error;
     break;
   case  home:
-    state = callServicePreMove(home_pose_name) ? ready : error;
+    state = callServicePreMove(home_pose_name) ? get_pose : error;
     break;
   default:
     ROS_ERROR("Master State is in error state");
