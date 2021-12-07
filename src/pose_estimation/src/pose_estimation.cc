@@ -104,6 +104,7 @@ bool PoseEstimation::Estimate_pose(pose_estimation::pose_est_srv::Request   &req
   
   res.rel_object_ids = object_ids;
 
+
   //std::string out_str = "Number of detected objects: " + std::to_string(object_points.size());
 	//ROS_INFO_STREAM(out_str);
 	return true;
@@ -173,17 +174,20 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
       new_rot_rects.push_back(rot_rects[i]);
     }
   }
+
   object_ids = new_objects;
 
-  // Save detections to file
-  detector::SaveToFile(img_rgb, img_depth, new_rot_rects);
+  if (new_objects.size() > 0)
+  {
+    // Save detections to file
+    detector::SaveToFile(img_rgb, img_depth, new_rot_rects);
 
-  // Draw detections
-  detector::ShowDetections(img_rgb, contours2, new_rot_rects);
+    // Draw detections
+    detector::ShowDetections(img_rgb, contours2, new_rot_rects);
+  }
 
   return detector::convert_2_transforms(new_rot_rects, depth, img_rgb.size().width, img_rgb.size().height, f_x, f_y, camera2base);
 }
-
 
 void PoseEstimation::getQuaternion(cv::Mat R, float Q[])
 {
