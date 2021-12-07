@@ -13,7 +13,7 @@ void mySigintHandler(int sig)
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "envir_node");
+  ros::init(argc, argv, "enviroment_node");
   EnviromentControllerNode node;  
   signal(SIGINT, mySigintHandler);
   ros::Rate r(1);

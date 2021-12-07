@@ -22,7 +22,11 @@ int main(int argc, char **argv)
   {		 ros::spinOnce();                                                                                                                                                                                                                                                                    
           node.stateLoop();
           r.sleep();
-          ROS_INFO("Master state:  %s", (node.getState()).c_str());     
+          //ROS_INFO("Master state:  %s", (node.getState()).c_str());     
+          if (node.getState() == "error")
+          {
+            break;
+          }
   }  
    return 0;
 };

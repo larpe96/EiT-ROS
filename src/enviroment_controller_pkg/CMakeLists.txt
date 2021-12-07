@@ -38,6 +38,7 @@ set(SOURCES
 add_service_files(
 FILES
 module_poses_srv.srv
+kit_info_srv.srv
 )
 
 ## Generate actions in the 'action' folder

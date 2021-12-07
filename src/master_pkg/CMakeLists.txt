@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   pose_estimation
   position_controller_pkg
   enviroment_controller_pkg
+  parts_list_pkg
   roscpp
   std_msgs
   sensor_msgs
