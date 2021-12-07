@@ -13,6 +13,7 @@
 #include "std_srvs/Trigger.h"
 
 #include "pose_estimation/pose_est_srv.h"
+#include "parts_list_pkg/missing_parts.h"
 
 #include "position_controller_pkg/Tcp_move.h"
 #include "position_controller_pkg/Pre_def_pose.h"
@@ -59,6 +60,7 @@ public:
 
 protected:
   int callServicePoseEstimate();
+  void callServiceMissingParts();
   bool callServiceTcpMove(geometry_msgs::Pose);
   bool callServiceGripperMove(float width,float speed);
   bool callServiceGripperGrasp(float width,float speed);
@@ -78,6 +80,7 @@ protected:
                                 std_srvs::Trigger::Response &res);
 
   ros::ServiceClient pose_estim_client;
+  ros::ServiceClient missing_parts_client;
 
   ros::ServiceClient gripper_move_client;
   ros::ServiceClient gripper_grasp_client;

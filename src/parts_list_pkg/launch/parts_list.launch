@@ -1,0 +1,3 @@
+<launch>
+  <node name="parts_list" pkg="parts_list_pkg" type="part_list" output="screen" respawn="true"/>
+</launch>
