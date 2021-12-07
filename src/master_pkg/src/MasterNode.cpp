@@ -90,7 +90,7 @@ int MasterNode::setupServices()
   {
     return 0;
   }
-  setupBool = ros::service::waitForService("move2_def_pos_srv", 10);
+  setupBool = ros::service::waitForService("SET/robot_home", 10);
   if (setupBool == 0)
   {
     return 0;
@@ -127,7 +127,7 @@ int MasterNode::setupServices()
   pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
   missing_parts_client = n.serviceClient<parts_list_pkg::missing_parts>("missing_parts_srv");
   tcp_control_client = n.serviceClient<position_controller_pkg::Tcp_move>("move2_pos_srv");
-  tcp_pre_def_control_client = n.serviceClient<position_controller_pkg::Pre_def_pose>("move2_def_pos_srv");
+  robot_home_control_client = n.serviceClient<std_srvs::Trigger>("SET/robot_home");
 
   gripper_move_client = n.serviceClient<master_pkg::gripper_Move>("wsg_50_driver/move");
   gripper_grasp_client = n.serviceClient<master_pkg::gripper_Move>("wsg_50_driver/grasp");
@@ -298,22 +298,19 @@ bool MasterNode::callServiceTcpMove(geometry_msgs::Pose TCP_pose)
     }
 }
 
-bool MasterNode::callServicePreMove(std::string pose_name)
+bool MasterNode::callServiceGoHome()
 {
-    position_controller_pkg::Pre_def_pose msg;
-
-    msg.request.pre_def_pose = pose_name;
-
-    if (!tcp_pre_def_control_client.call(msg))
+    std_srvs::Trigger msg;
+    if (!robot_home_control_client.call(msg))
     {
-        ROS_ERROR("Failed to call service: %s", tcp_pre_def_control_client.getService().c_str());
+        ROS_ERROR("Failed to call service: %s", robot_home_control_client.getService().c_str());
         return 0;
     }
 
-    if (msg.response.succes != 1)
+    if (msg.response.success != 1)
     {
 
-      ROS_ERROR("Robot could not move. Error code: %d",msg.response.succes);
+      ROS_ERROR("Robot could not move. Error code: %d",msg.response.success);
       return 0;
     }
     else
@@ -362,7 +359,7 @@ void MasterNode::stateLoop()
       }
       else
       {
-        state = callServicePreMove(home_pose_name) ? ready : error;
+        state = callServiceGoHome() ? ready : error;
       }
 
     }
@@ -375,10 +372,15 @@ void MasterNode::stateLoop()
     {
       int res = 0;
       res = callServicePoseEstimate();
-      res = callServicePickupDB(obj_ids[0], obj_pose);
+      
       callServiceMissingParts();
       if( res == 1 )
       {
+        res = callServicePickupDB(obj_ids[0], obj_pose);
+        if(res == 0)
+        {
+          state = error;
+        }
         state = approach_pose;
       }
       else if(res == 0)
@@ -395,13 +397,6 @@ void MasterNode::stateLoop()
     {
       
       int res = 0;
-      /*obj_pose.orientation.x = 0.17;
-      obj_pose.orientation.y = -0.985;
-      obj_pose.orientation.z = 0.0;
-      obj_pose.orientation.w = 0.0;*/
-      //obj_pose.position.z = obj_pose.position.z + 0.1;
-      //geometry_msgs::Pose tcp_pose = obj_pose;
-      //tcp_pose.position.z = tcp_pose.position.z + 0.1;
       res = callServiceTcpMove(pose_pickup_approach);
 
       if (res == 1)
@@ -432,7 +427,7 @@ void MasterNode::stateLoop()
       {
         if (callServiceGripperMove(100,100))
         {
-          state = callServicePreMove(home_pose_name) ? get_pose : error;
+          state = callServiceGoHome() ? get_pose : error;
         }
       }
       break;
@@ -440,17 +435,11 @@ void MasterNode::stateLoop()
   case deproach_pose:
     {
       int res = 0;
-      obj_pose.orientation.x = 0.17;
-      obj_pose.orientation.y = -0.985;
-      obj_pose.orientation.z = 0.0;
-      obj_pose.orientation.w = 0.0;
-      //obj_pose.position.z = obj_pose.position.z + 0.1;
-      geometry_msgs::Pose tcp_pose = obj_pose;
-      tcp_pose.position.z = tcp_pose.position.z + 0.1;
-      res = callServiceTcpMove(tcp_pose);
+      res = callServiceTcpMove(pose_pickup_approach);
       if (res == 1)
       {
-        state = move_to_approach_drop_off;
+        state = callServiceGoHome() ? move_to_approach_drop_off : error;
+        //state = move_to_approach_drop_off;
       }
       else
       {
@@ -481,7 +470,7 @@ void MasterNode::stateLoop()
     state = callServiceTcpMove(approach_drop_off_pose) ? home : error;
     break;
   case  home:
-    state = callServicePreMove(home_pose_name) ? get_pose : error;
+    state = callServiceGoHome() ? get_pose : error;
     break;
   default:
     ROS_ERROR("Master State is in error state");

@@ -8,6 +8,7 @@
 EnviromentControllerNode::EnviromentControllerNode()
 {
     resetAssemblyKit();
+    
     //server services
     reset_kit_server = n.advertiseService("reset_kit", &EnviromentControllerNode::resetKit,this);
     get_module_poses_server = n.advertiseService("get_module_drop_off_poses", &EnviromentControllerNode::sendModulePoses,this);
@@ -86,12 +87,6 @@ bool EnviromentControllerNode::sendModulePoses(enviroment_controller_pkg::module
     res.drop_off_pose = drop_off_pose;
     res.approach_pose = approach_pose;
 
-    // std::cout << req.obj_type << std::endl;
-    // std::cout << "approach_pose" << std::endl;
-    // std::cout << approach_pose << std::endl;
-    // std::cout << "drop_off_pose" << std::endl;
-    // std::cout << drop_off_pose << std::endl;
-    
     return true;
 }
 
@@ -131,11 +126,12 @@ std::vector<std::vector<int>> EnviromentControllerNode::getGridmatrix(std::strin
             temp_vec.push_back(stoi(token));
             temp_vec_string[i].erase(0, pos + delimiter.length());
         }
-        token = temp_vec_string[0].substr(0, pos);
+        token = temp_vec_string[i].substr(0, pos);
         temp_vec.push_back(stoi(token));
 
         grid_matrix.push_back(temp_vec);
     }
+    assembly_kit.printGrid();
 
     return grid_matrix;
 }

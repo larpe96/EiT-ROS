@@ -67,7 +67,7 @@ protected:
   bool callServiceGripperMove(float width,float speed);
   bool callServiceGripperGrasp(float width,float speed);
   bool callServiceGripperSetForce(float force);
-  bool callServicePreMove(std::string pose_name);
+  bool callServiceGoHome();
   bool callServiceObjDropOff(std::string obj_type);
   bool callServicePickupDB(std::string obj_type, geometry_msgs::Pose pose_estimated);
 
@@ -90,7 +90,7 @@ protected:
   ros::ServiceClient gripper_set_force_client;
 
   ros::ServiceClient tcp_control_client;
-  ros::ServiceClient tcp_pre_def_control_client;
+  ros::ServiceClient robot_home_control_client;
 
   ros::ServiceClient drop_off_poses_client;
 
@@ -106,7 +106,7 @@ protected:
   const char *state_name[13] = { "error","init", "ready", "get_pose","approach_pose",
                             "move_to_pose","grasp_obj", "deproach_pose" , "move_to_approach_drop_off",
                             "move_to_drop_off","drop_obj","move_to_deproach_drop_off", "home"};
-
+                            
   geometry_msgs::Pose obj_pose;
   geometry_msgs::Pose pose_pickup;
   geometry_msgs::Pose pose_pickup_approach;
