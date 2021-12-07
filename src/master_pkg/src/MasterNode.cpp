@@ -253,9 +253,8 @@ int MasterNode::callServicePoseEstimate()
         else
         {
           obj_pose = msg.response.rel_object_poses.poses[0];
-          obj_id = msg.response.rel_object_ids[0];
+          obj_ids = msg.response.rel_object_ids;
 
-          std::cout << obj_id << " " <<obj_pose<< std::endl;
           return 1;
         }
     }
@@ -345,7 +344,6 @@ void MasterNode::stateLoop()
   case  get_pose:
     {
       int res = 0;
-      std::cout << "callServicePoseEstimate"<< std::endl;
       res = callServicePoseEstimate();
       callServiceMissingParts();
       if( res == 1 )
@@ -364,13 +362,8 @@ void MasterNode::stateLoop()
     }
   case approach_pose:
     {
-      std::cout << "callServiceTcpMove"<< std::endl;
+      
       int res = 0;
-      /*obj_pose.orientation.x = 0.17;
-      obj_pose.orientation.y = -0.985;
-      obj_pose.orientation.z = 0.0;
-      obj_pose.orientation.w = 0.0;*/
-      //obj_pose.position.z = obj_pose.position.z + 0.1;
       geometry_msgs::Pose tcp_pose = obj_pose;
       tcp_pose.position.z = tcp_pose.position.z + 0.1;
       res = callServiceTcpMove(tcp_pose);
@@ -430,7 +423,7 @@ void MasterNode::stateLoop()
     }
   case  move_to_approach_drop_off:
     {
-      int res = callServiceObjDropOff(obj_id);
+      int res = callServiceObjDropOff(obj_ids[0]);
       if (res == 0)
       {
         state = error;
