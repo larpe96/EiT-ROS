@@ -22,6 +22,7 @@ class Classifier_ros_node:
             data = [param.width, param.height]
             label, prob = self.cf.classify(data)
             mask = False
+            class_label = "False detection"
             print("data: ", data)
             print("prob: ", prob)
             print("label: ", label)
@@ -34,8 +35,8 @@ class Classifier_ros_node:
                 else:
                     mask = False
                     class_label = "False detection"
-                names.append(class_label)
-                masks.append(mask)
+            names.append(class_label)
+            masks.append(mask)
 
         print(names)
         print(masks)
