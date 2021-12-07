@@ -256,7 +256,7 @@ int MasterNode::callServicePoseEstimate()
         else
         {
           obj_pose = msg.response.rel_object_poses.poses[0];
-          obj_id = msg.response.rel_object_ids[0];
+          obj_ids[0] = msg.response.rel_object_ids[0];
           return 1;
         }
     }
@@ -369,7 +369,7 @@ void MasterNode::stateLoop()
     {
       int res = 0;
       res = callServicePoseEstimate();
-      res = callServicePickupDB(obj_id , obj_pose);
+      res = callServicePickupDB(obj_ids[0], obj_pose);
       callServiceMissingParts();
       if( res == 1 )
       {
