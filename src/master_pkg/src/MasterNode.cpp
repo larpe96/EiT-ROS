@@ -36,6 +36,9 @@ bool MasterNode::initGraspSeq(std_srvs::Trigger::Request  &req,
 {
   if (state == ready)
   {
+    bool status = callServicePoseEstimate();
+    callServiceMissingParts();
+
     state = get_pose;
     res.success = 1;
     res.message = "init grasp seq";
@@ -107,10 +110,15 @@ int MasterNode::setupServices()
   {
     return 0;
   }
-
+  setupBool = ros::service::waitForService("missing_parts_srv", 10);
+  if (setupBool == 0)
+  {
+    return 0;
+  }
 
   //client services
   pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
+  missing_parts_client = n.serviceClient<parts_list_pkg::missing_parts>("missing_parts_srv");
   tcp_control_client = n.serviceClient<position_controller_pkg::Tcp_move>("move2_pos_srv");
   tcp_pre_def_control_client = n.serviceClient<position_controller_pkg::Pre_def_pose>("move2_def_pos_srv");
 
@@ -203,6 +211,27 @@ bool MasterNode::callServiceGripperSetForce(float force)
      return 0;
     }
     return 1;
+}
+
+
+void MasterNode::callServiceMissingParts()
+{
+    parts_list_pkg::missing_parts MP_msg; 
+    MP_msg.request.detected_parts = obj_ids; 
+    missing_parts_client.call(MP_msg);
+    if(MP_msg.response.missing_parts.size() > 0)
+    {
+        std::string output = "Missing Parts: "; 
+        for(int i = 0; i < MP_msg.response.missing_parts.size(); i++)
+        {
+          output = output + MP_msg.response.missing_parts[i] + ",  ";
+        }
+        ROS_INFO_STREAM(output); 
+    }
+    else
+    {
+        ROS_INFO_STREAM("Missing Parts: None"); 
+    }
 }
 
 
@@ -311,6 +340,7 @@ void MasterNode::stateLoop()
     {
       int res = 0;
       res = callServicePoseEstimate();
+      callServiceMissingParts();
       if( res == 1 )
       {
         state = approach_pose;
