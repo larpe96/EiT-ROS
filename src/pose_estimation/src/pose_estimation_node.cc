@@ -10,7 +10,6 @@ int main(int argc, char** argv)
 
 
   // Detector
-
   PoseEstimation detector;
   detector.Initialize(nh);
 

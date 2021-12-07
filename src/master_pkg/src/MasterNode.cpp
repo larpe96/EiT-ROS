@@ -110,6 +110,13 @@ int MasterNode::setupServices()
   {
     return 0;
   }
+
+  setupBool = ros::service::waitForService("pickup_db", 10);
+  if (setupBool == 0)
+  {
+    return 0;
+  }
+
   setupBool = ros::service::waitForService("missing_parts_srv", 10);
   if (setupBool == 0)
   {
@@ -127,6 +134,7 @@ int MasterNode::setupServices()
   gripper_set_force_client = n.serviceClient<master_pkg::gripper_Conf>("wsg_50_driver/set_force");
 
   drop_off_poses_client = n.serviceClient<enviroment_controller_pkg::module_poses_srv>("get_module_drop_off_poses");
+  pickup_db_client = n.serviceClient<pickup_db::pickup_db_srv>("pickup_db");
 
   //server services
   system_state_server = n.advertiseService("system_state", &MasterNode::sendSystemState,this);
@@ -221,21 +229,21 @@ bool MasterNode::callServiceGripperSetForce(float force)
 
 void MasterNode::callServiceMissingParts()
 {
-    parts_list_pkg::missing_parts MP_msg; 
-    MP_msg.request.detected_parts = obj_ids; 
+    parts_list_pkg::missing_parts MP_msg;
+    MP_msg.request.detected_parts = obj_ids;
     missing_parts_client.call(MP_msg);
     if(MP_msg.response.missing_parts.size() > 0)
     {
-        std::string output = "Missing Parts: "; 
+        std::string output = "Missing Parts: ";
         for(int i = 0; i < MP_msg.response.missing_parts.size(); i++)
         {
           output = output + MP_msg.response.missing_parts[i] + ",  ";
         }
-        ROS_INFO_STREAM(output); 
+        ROS_INFO_STREAM(output);
     }
     else
     {
-        ROS_INFO_STREAM("Missing Parts: None"); 
+        ROS_INFO_STREAM("Missing Parts: None");
     }
 }
 
@@ -253,6 +261,7 @@ int MasterNode::callServicePoseEstimate()
         else
         {
           obj_pose = msg.response.rel_object_poses.poses[0];
+
           obj_ids = msg.response.rel_object_ids;
 
           return 1;
@@ -313,6 +322,27 @@ bool MasterNode::callServicePreMove(std::string pose_name)
     }
 }
 
+bool MasterNode::callServicePickupDB(std::string obj_type, geometry_msgs::Pose pose_estimated)
+{
+    pickup_db::pickup_db_srv msg;
+
+    msg.request.object_type = obj_type;
+    msg.request.object_pose = pose_estimated;
+
+    if (!pickup_db_client.call(msg))
+    {
+      ROS_ERROR("Failed to call service: %s", pickup_db_client.getService().c_str());
+      return 0;
+    }
+    else
+    {
+      pose_pickup = msg.response.pose_pickup;
+      pose_pickup_approach = msg.response.pose_approach;
+      gripper_open_width = msg.response.open_width;
+      return 1;
+    }
+}
+
 std::string MasterNode::getState()
 {
   return state_name[state];
@@ -345,6 +375,7 @@ void MasterNode::stateLoop()
     {
       int res = 0;
       res = callServicePoseEstimate();
+      res = callServicePickupDB(obj_ids[0], obj_pose);
       callServiceMissingParts();
       if( res == 1 )
       {
@@ -364,9 +395,15 @@ void MasterNode::stateLoop()
     {
       
       int res = 0;
-      geometry_msgs::Pose tcp_pose = obj_pose;
-      tcp_pose.position.z = tcp_pose.position.z + 0.1;
-      res = callServiceTcpMove(tcp_pose);
+      /*obj_pose.orientation.x = 0.17;
+      obj_pose.orientation.y = -0.985;
+      obj_pose.orientation.z = 0.0;
+      obj_pose.orientation.w = 0.0;*/
+      //obj_pose.position.z = obj_pose.position.z + 0.1;
+      //geometry_msgs::Pose tcp_pose = obj_pose;
+      //tcp_pose.position.z = tcp_pose.position.z + 0.1;
+      res = callServiceTcpMove(pose_pickup_approach);
+
       if (res == 1)
       {
         state = move_to_pose;
@@ -381,13 +418,13 @@ void MasterNode::stateLoop()
   case  move_to_pose:
   {
     
-    state = callServiceTcpMove(obj_pose) ? grasp_obj : error;
+    state = callServiceTcpMove(pose_pickup) ? grasp_obj : error;
     break;
     }
   case  grasp_obj:
     {
       state = error;
-      if (callServiceGripperGrasp(25,50) )
+      if (callServiceGripperGrasp(gripper_open_width, 50) )
       {
         state = deproach_pose;
       }
