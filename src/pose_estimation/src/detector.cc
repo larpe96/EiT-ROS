@@ -156,17 +156,18 @@ cv::Mat eulerAnglesToRotationMatrix(cv::Vec3f &theta)
             rot_rect.angle += 90;
           }
 
-          if (rot_rect.angle > 90)
+          if (rot_rect.angle > 0)
           {
             rot_rect.angle -= 180;
           }
 
-          if (rot_rect.angle < -90)
+          if (rot_rect.angle < -180)
           {
             rot_rect.angle += 180;
           }
 
-          rot_rect.angle = -abs(rot_rect.angle);
+          //rot_rect.angle = -abs(rot_rect.angle);
+          //rot_rect.angle = -180;
 
           rot_rects.push_back(rot_rect);
       }

@@ -78,7 +78,7 @@ class Robot(RTDEControl, RTDEReceive, RTDEIO):
             return False, "Was not able to disable free drive"
     
     def cb_set_robot_homeJ(self,req):
-        b = self.moveJ(HOME_POSE, speed = 2, acceleration = 2,)
+        b = self.moveJ(HOME_POSE, speed = 3, acceleration = 2,)
         if b:
             time.sleep(1) # is needed to assure that the robot is ready (empirical tested)
             str = "OK"

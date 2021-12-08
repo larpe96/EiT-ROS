@@ -62,7 +62,7 @@ bool MasterNode::setupNodes()
     return 0;
   }
 
-  if (callServiceGripperMove(100, 100) == 0)
+  if (callServiceGripperMove(100, 250) == 0)
   {
     return 0;
   }
@@ -371,9 +371,10 @@ void MasterNode::stateLoop()
   case  get_pose:
     {
       int res = 0;
+      obj_ids.clear();
+
       res = callServicePoseEstimate();
       
-      callServiceMissingParts();
       if( res == 1 )
       {
         res = callServicePickupDB(obj_ids[0], obj_pose);
@@ -419,13 +420,13 @@ void MasterNode::stateLoop()
   case  grasp_obj:
     {
       state = error;
-      if (callServiceGripperGrasp(gripper_open_width, 50) )
+      if (callServiceGripperGrasp(gripper_open_width, 250) )
       {
         state = deproach_pose;
       }
       else 
       {
-        if (callServiceGripperMove(100,100))
+        if (callServiceGripperMove(100,250))
         {
           state = callServiceGoHome() ? get_pose : error;
         }
@@ -464,7 +465,7 @@ void MasterNode::stateLoop()
     state = callServiceTcpMove(drop_off_pose) ? drop_obj : error;
     break;
   case  drop_obj:
-    state = callServiceGripperMove(100,100) ? move_to_deproach_drop_off : error;
+    state = callServiceGripperMove(100,250) ? move_to_deproach_drop_off : error;
     break;
   case  move_to_deproach_drop_off:
     state = callServiceTcpMove(approach_drop_off_pose) ? home : error;

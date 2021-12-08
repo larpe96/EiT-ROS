@@ -172,6 +172,8 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
     {
       new_objects.push_back(labels[i]);
       new_rot_rects.push_back(rot_rects[i]);
+
+      std::cout << "Angle of detected rot_rect: " << rot_rects[i].angle << std::endl;
     }
   }
 

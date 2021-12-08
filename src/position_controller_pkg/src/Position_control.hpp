@@ -38,8 +38,8 @@ private:
     ros::ServiceClient p2p_service;
     ros::ServiceClient robState_service;
     int32_t max_waiting_time= -1; // mili seconds
-    double std_vel = 2.0;
-    double std_acc = 0.50;
+    double std_vel = 3.0;
+    double std_acc = 1;
     /* Functions */
     int move2Pose(position_controller_pkg::Tcp_move::Request &req, ur_robot_pkg::p2p_cmove::Response & res);
     int getRobState();
