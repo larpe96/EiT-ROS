@@ -24,6 +24,8 @@
 #include "master_pkg/gripper_Move.h"
 #include "master_pkg/gripper_Conf.h"
 
+#include "pickup_db/pickup_db_srv.h"
+
 #define home_pose_name  "pose_2"
 #define grasp_pose_name "pose_0"
 #define approach_pose_name "pose_1"
@@ -39,8 +41,10 @@ enum State
   move_to_pose,
   grasp_obj,
   deproach_pose,
-  move_with_obj,
+  move_to_approach_drop_off,
+  move_to_drop_off,
   drop_obj,
+  move_to_deproach_drop_off,
   home
 };
 
@@ -63,8 +67,9 @@ protected:
   bool callServiceGripperMove(float width,float speed);
   bool callServiceGripperGrasp(float width,float speed);
   bool callServiceGripperSetForce(float force);
-  bool callServicePreMove(std::string pose_name);
+  bool callServiceGoHome();
   bool callServiceObjDropOff(std::string obj_type);
+  bool callServicePickupDB(std::string obj_type, geometry_msgs::Pose pose_estimated);
 
 
 
@@ -73,7 +78,7 @@ protected:
 
   bool sendSystemState(master_pkg::system_state_srv::Request  &req,
                                 master_pkg::system_state_srv::Response &res);
-  
+
   bool initGraspSeq(std_srvs::Trigger::Request  &req,
                                 std_srvs::Trigger::Response &res);
 
@@ -85,23 +90,32 @@ protected:
   ros::ServiceClient gripper_set_force_client;
 
   ros::ServiceClient tcp_control_client;
-  ros::ServiceClient tcp_pre_def_control_client;
+  ros::ServiceClient robot_home_control_client;
 
   ros::ServiceClient drop_off_poses_client;
 
   ros::ServiceServer system_state_server;
   ros::ServiceServer init_grasp_seq_server;
-  
+
+  ros::ServiceClient pickup_db_client;
+
 
 
   State state = init;
   ros::NodeHandle n;
-  const char *state_name[11] = { "error","init", "ready", "get_pose","approach_pose",
-                            "move_to_pose","grasp_obj", "deproach_pose","move_with_obj",
-                            "drop_obj", "home"};
-
+  const char *state_name[13] = { "error","init", "ready", "get_pose","approach_pose",
+                            "move_to_pose","grasp_obj", "deproach_pose" , "move_to_approach_drop_off",
+                            "move_to_drop_off","drop_obj","move_to_deproach_drop_off", "home"};
+                            
   geometry_msgs::Pose obj_pose;
+  geometry_msgs::Pose pose_pickup;
+  geometry_msgs::Pose pose_pickup_approach;
+  float gripper_open_width;
+
   std::vector<std::string> obj_ids;
+  
+  geometry_msgs::Pose approach_drop_off_pose;
+  geometry_msgs::Pose drop_off_pose;
 };
 
 #endif // MASTER_NODE_H

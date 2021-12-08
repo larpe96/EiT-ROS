@@ -12,7 +12,7 @@ import numpy as np
 import time
 
 from ur_robot_pkg.srv import p2p_cmove, jointQs, RobState, CurrTCPPose, set_TCP_offset
-
+HOME_POSE = [1.90, -1.81, 1.99, -1.74, -1.56, 0]
 
 class Robot(RTDEControl, RTDEReceive, RTDEIO):
     def __init__(self, _ip):
@@ -76,6 +76,15 @@ class Robot(RTDEControl, RTDEReceive, RTDEIO):
             return True, "Disabled free drive"
         else:
             return False, "Was not able to disable free drive"
+    
+    def cb_set_robot_homeJ(self,req):
+        b = self.moveJ(HOME_POSE, speed = 2, acceleration = 2,)
+        if b:
+            time.sleep(1) # is needed to assure that the robot is ready (empirical tested)
+            str = "OK"
+        else:
+            str = "BAD- Failed moving"
+        return b, str
 
 
     def cb_set_TCP_offset(self, req):
@@ -111,6 +120,7 @@ class Servicenode(Robot):
         srv_Tcp_pose = rospy.Service("GET/tcp_pose_srv", CurrTCPPose, self.robot.cb_get_TCP_Pose)
         srv_set_TCP_offset = rospy.Service("SET/tcp_offset_srv", set_TCP_offset, self.robot.cb_set_TCP_offset)
         srv_get_rob_ip = rospy.Service("GET/robot_ip", Trigger, self.robot.cb_get_robot_ip)
+        srv_set_rob_homeJ = rospy.Service("SET/robot_home", Trigger, self.robot.cb_set_robot_homeJ)
         rospy.spin()
 
 
@@ -133,8 +143,8 @@ if __name__ =="__main__":
     except:
         print("robot connection failed")
         print("Trying VM")
-#        try:
-#            _ip = "127.0.0.1" # VM
-#            ser_node = Servicenode(_ip)
-#        except ROSInterruptException:
-#            pass
+    #    try:
+    #        _ip = "127.0.0.1" # VM
+    #        ser_node = Servicenode(_ip)
+    #    except ROSInterruptException:
+    #        pass

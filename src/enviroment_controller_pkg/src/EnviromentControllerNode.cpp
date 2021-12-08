@@ -8,9 +8,11 @@
 EnviromentControllerNode::EnviromentControllerNode()
 {
     resetAssemblyKit();
+    
     //server services
     reset_kit_server = n.advertiseService("reset_kit", &EnviromentControllerNode::resetKit,this);
     get_module_poses_server = n.advertiseService("get_module_drop_off_poses", &EnviromentControllerNode::sendModulePoses,this);
+    get_kit_info_server = n.advertiseService("get_kit_info", &EnviromentControllerNode::getKitInfo,this);
 } // end 
 
 void EnviromentControllerNode::resetAssemblyKit()
@@ -25,6 +27,45 @@ bool EnviromentControllerNode::resetKit(std_srvs::Trigger::Request  &req,
   resetAssemblyKit();
   res.success = 1;
   return true;
+}
+
+bool EnviromentControllerNode::getKitInfo(enviroment_controller_pkg::kit_info_srv::Request  &req,
+                                enviroment_controller_pkg::kit_info_srv::Response &res)
+{
+    if( assembly_kit.grid_matrix.size() == 0)
+    {
+        res.x_dim = 0;
+        res.y_dim = 0;
+    }
+    else 
+    {
+        res.x_dim = assembly_kit.grid_matrix.size();
+        res.y_dim = assembly_kit.grid_matrix[0].size();
+        for (int x = 0; x < assembly_kit.grid_matrix.size(); x++)
+        {
+            for (int y = 0; y < assembly_kit.grid_matrix[0].size(); y++)
+            {
+                res.kit_modules.push_back(assembly_kit.grid_matrix[x][y]);
+                if (assembly_kit.grid_matrix[x][y] != 0)
+                {
+                    for (int i = 0; i < assembly_kit.modules.size(); i++)
+                    {
+                        if (assembly_kit.modules[i].pose_in_kit.x == x && assembly_kit.modules[i].pose_in_kit.y == y)
+                        {
+                            res.obj_in_modules.push_back(assembly_kit.modules[i].object_in_module);
+                            break;
+                        }
+                    }
+                }   
+                else
+                {
+                    res.obj_in_modules.push_back(0);
+                }
+            }
+        }
+    }
+    
+    return true;
 }
 
 bool EnviromentControllerNode::sendModulePoses(enviroment_controller_pkg::module_poses_srv::Request  &req,
@@ -46,9 +87,6 @@ bool EnviromentControllerNode::sendModulePoses(enviroment_controller_pkg::module
     res.drop_off_pose = drop_off_pose;
     res.approach_pose = approach_pose;
 
-    std::cout << req.obj_type << std::endl;
-    std::cout<< "drop_off_pose" << drop_off_pose << std::endl;
-    
     return true;
 }
 
@@ -73,13 +111,11 @@ std::vector<std::vector<int>> EnviromentControllerNode::getGridmatrix(std::strin
     std::string delimiter = ";";
 
     std::string token;
-
     while ((pos = grid.find(delimiter)) != std::string::npos) {
         token = grid.substr(0, pos);
         temp_vec_string.push_back(token);
         grid.erase(0, pos + delimiter.length());
     }
-    
     delimiter = ',';
     
     for (int i = 0; i < temp_vec_string.size(); i++)
@@ -90,8 +126,13 @@ std::vector<std::vector<int>> EnviromentControllerNode::getGridmatrix(std::strin
             temp_vec.push_back(stoi(token));
             temp_vec_string[i].erase(0, pos + delimiter.length());
         }
+        token = temp_vec_string[i].substr(0, pos);
+        temp_vec.push_back(stoi(token));
+
         grid_matrix.push_back(temp_vec);
     }
+    assembly_kit.printGrid();
+
     return grid_matrix;
 }
 AssemblyKit EnviromentControllerNode::loadAssemblyKit(std::string jsonpath,std::string filename)

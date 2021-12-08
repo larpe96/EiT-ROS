@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(pose_estimation)
+project(pickup_db)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -7,19 +7,13 @@ project(pose_estimation)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-SET("OpenCV_DIR" "/usr/share/OpenCV")
 find_package(catkin REQUIRED COMPONENTS
-  OpenCV
-  classifier_pkg
-  cv_bridge
   geometry_msgs
-  image_transport
   message_generation
   roscpp
-  sensor_msgs
   std_msgs
-  dynamic_reconfigure
 )
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -61,7 +55,7 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-add_service_files(DIRECTORY srv FILES pose_est_srv.srv)
+add_service_files(DIRECTORY srv FILES pickup_db_srv.srv)
 # add_service_files(
 #   FILES
 #   Service1.srv
@@ -75,15 +69,12 @@ add_service_files(DIRECTORY srv FILES pose_est_srv.srv)
 #   Action2.action
 # )
 
-
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
-   DEPENDENCIES
-   std_msgs
-   sensor_msgs
-   geometry_msgs
- )
-
+  DEPENDENCIES
+    geometry_msgs
+    std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -99,10 +90,11 @@ generate_messages(
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
 ##     and list every .cfg file to be processed
 
-# Generate dynamic reconfigure parameters in the 'cfg' folder
-generate_dynamic_reconfigure_options(
-  cfg/PoseEstimation.cfg
-)
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+# generate_dynamic_reconfigure_options(
+#   cfg/DynReconf1.cfg
+#   cfg/DynReconf2.cfg
+# )
 
 ###################################
 ## catkin specific configuration ##
@@ -114,11 +106,9 @@ generate_dynamic_reconfigure_options(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-   INCLUDE_DIRS include
-  LIBRARIES pose_estimation
-  CATKIN_DEPENDS
-    roscpp
-    dynamic_reconfigure # OpenCV cv_bridge geometry_msgs image_transport message_generation roscpp sensor_msgs std_msgs
+ INCLUDE_DIRS include
+ LIBRARIES pickup_db
+ CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
 
@@ -129,14 +119,13 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
+include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
- add_library(${PROJECT_NAME}
-   src/${PROJECT_NAME}.cc
-   src/detector.cc
+add_library(${PROJECT_NAME}
+  src/${PROJECT_NAME}.cc
 )
 
 ## Add cmake target dependencies of the library
@@ -147,10 +136,8 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/pose_estimation_node.cpp)
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
-add_executable(${PROJECT_NAME}_node src/pose_estimation_node.cc)
-target_link_libraries(pose_estimation_node pose_estimation ${catkin_LIBRARIES} ${OpenCV_LIBS})
+add_executable(${PROJECT_NAME}_node src/pickup_db_node.cc)
+target_link_libraries(pickup_db_node pickup_db ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -159,7 +146,7 @@ target_link_libraries(pose_estimation_node pose_estimation ${catkin_LIBRARIES} $
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 
 ## Add cmake target dependencies of the executable
-## same as for the library above
+# same as for the library above
 add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
@@ -196,11 +183,11 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 ## Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+# install(DIRECTORY include/${PROJECT_NAME}/
+#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 #   FILES_MATCHING PATTERN "*.h"
 #   PATTERN ".svn" EXCLUDE
-)
+# )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
@@ -214,7 +201,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_pose_estimation.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_pickup_db.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
@@ -223,12 +210,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
 # catkin_add_nosetests(test)
 
 set( project_sources
-   src/pose_estimation.cc
-   src/pose_estimation_node.cc
-   src/detector.cc
+   src/pickup_db.cc
+   src/pickup_db_node.cc
 )
 
-add_executable(pose_est_server ${project_sources})
-target_link_libraries(pose_est_server ${catkin_LIBRARIES})
-target_link_libraries(pose_est_server  ${OpenCV_LIBS})
-add_dependencies(pose_est_server pose_estimation_gencpp)
+add_executable(pickup_db_server ${project_sources})
+target_link_libraries(pickup_db_server ${catkin_LIBRARIES})
+add_dependencies(pickup_db_server pickup_db_gencpp)

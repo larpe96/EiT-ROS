@@ -1,0 +1,3 @@
+<launch>
+  <node name="pickup_db" pkg="pickup_db" type="pickup_db_node" output="screen" respawn="true"></node>
+</launch>

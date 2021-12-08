@@ -1,8 +1,11 @@
 <launch>
   <include file="$(find ur_robot_pkg)/launch/ur_driver.launch"/>
   <include file="$(find wsg_50_driver)/launch/wsg_50_tcp.launch"/>
+  <include file="$(find enviroment_controller_pkg)/launch/enviroment_controller_pkg.launch"/>
   <include file="$(find position_controller_pkg)/launch/position_controller.launch"/>
   <include file="$(find pose_estimation)/launch/pose_estimation.launch"/>
+  <include file="$(find pickup_db)/launch/pickup_db.launch"/>
   <include file="$(find parts_list_pkg)/launch/parts_list.launch"/>
+
   <node name="master_node" pkg="master_pkg" type="master" output="screen"/>
 </launch>

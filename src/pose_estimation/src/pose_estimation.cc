@@ -104,8 +104,9 @@ bool PoseEstimation::Estimate_pose(pose_estimation::pose_est_srv::Request   &req
   
   res.rel_object_ids = object_ids;
 
-  std::string out_str = "Number of detected objects: " + std::to_string(object_points.size());
-	ROS_INFO_STREAM(out_str);
+
+  //std::string out_str = "Number of detected objects: " + std::to_string(object_points.size());
+	//ROS_INFO_STREAM(out_str);
 	return true;
 }
 
@@ -124,17 +125,13 @@ bool PoseEstimation::callClassifier(std::vector<cv::RotatedRect> rot_rects, std:
     cds_req.params.push_back(param);
   }
 
-  ROS_INFO_STREAM("callClassifier");
-
   if(classify_detections.call(cds_req, cds_res))
   {
-    ROS_INFO_STREAM("callClassifier");
-
     labels = cds_res.names;
     mask = cds_res.mask;
 
-    std::string n_classified_obj = "Number of classified objects: " + std::to_string(labels.size());
-    ROS_INFO_STREAM(n_classified_obj);
+    //std::string n_classified_obj = "Number of classified objects: " + std::to_string(labels.size());
+    //ROS_INFO_STREAM(n_classified_obj);
     
     return true;
   }
@@ -162,29 +159,35 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
   // Classify detections
   std::vector<std::string> labels;
   std::vector<int> mask;
+  
   bool res = callClassifier(rot_rects, labels, mask);
 
   // Push correctly classified objects to the output vector
   std::vector<std::string> new_objects;
+  std::vector<cv::RotatedRect> new_rot_rects;
+
   for (int i = 0; i < mask.size(); i++)
   {
     if (mask[i] == true)
     {
-      //object_ids.push_back(labels[i]);
       new_objects.push_back(labels[i]);
+      new_rot_rects.push_back(rot_rects[i]);
     }
   }
+
   object_ids = new_objects;
 
-  // Save detections to file
-  detector::SaveToFile(img_rgb, img_depth, rot_rects);
+  if (new_objects.size() > 0)
+  {
+    // Save detections to file
+    detector::SaveToFile(img_rgb, img_depth, new_rot_rects);
 
-  // Draw detections
-  detector::ShowDetections(img_rgb, contours2, rot_rects);
+    // Draw detections
+    detector::ShowDetections(img_rgb, contours2, new_rot_rects);
+  }
 
-  return detector::convert_2_transforms(rot_rects, depth, img_rgb.size().width, img_rgb.size().height, f_x, f_y, camera2base);
+  return detector::convert_2_transforms(new_rot_rects, depth, img_rgb.size().width, img_rgb.size().height, f_x, f_y, camera2base);
 }
-
 
 void PoseEstimation::getQuaternion(cv::Mat R, float Q[])
 {
@@ -223,7 +226,7 @@ void PoseEstimation::OnDynamicReconfigure(PoseEstimation::DynamicReconfigureType
   config_ = config;
   // Load background image
   img_empty_background = cv::imread(config_.empty_img_path);
-  std::cout << "reconfig" << std::endl;
+  //std::cout << "reconfig" << std::endl;
 
   // Subscribers
   bool resubscribe = !camera_sync_ ||

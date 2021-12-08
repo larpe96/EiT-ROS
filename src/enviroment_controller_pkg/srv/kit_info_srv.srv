@@ -1,0 +1,5 @@
+---
+int8 x_dim
+int8 y_dim
+int8[] kit_modules
+int8[] obj_in_modules
