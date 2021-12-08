@@ -46,8 +46,8 @@ with open(output_file_name, 'w', newline='') as open_file:
                     if rot_rect[-1] < -90:
                         rot_rect = (rot_rect[0],rot_rect[1],rot_rect[-1]+180)
                     print(rot_rect)
-                    class_name = annotation['label']
-                    class_name = int(class_name[-1])
+                    class_name_str = annotation['label']
+                    class_name = int(class_name_str[-1])
                     img_id = int(str(image_name).split("_")[-1].split(".")[0])
                     cx, cy = rot_rect[0]
                     width, height = rot_rect[1]
@@ -57,5 +57,7 @@ with open(output_file_name, 'w', newline='') as open_file:
                     box = cv.boxPoints(rot_rect) #for OpenCV 3.x
                     box = np.int0(box)
                     cv.drawContours(img,[box],0,(0,0,255),2)
-            cv.imwrite(output_folder +"/"+image_name, img)
-            print("saved file: "+ output_folder +"/"+image_name)
+                    img = cv.putText(img, class_name_str, (box[3][0], box[3][1]), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+            if not img is None: 
+                cv.imwrite(output_folder +"/"+image_name, img)
+                print("saved file: "+ output_folder +"/"+image_name)
