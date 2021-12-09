@@ -64,13 +64,17 @@ void PoseEstimation::OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, cons
   img_depth.convertTo(adjMap, CV_8UC1, 255 / (max-min), -min);
   cv::applyColorMap(adjMap, falseColorMap, cv::COLORMAP_AUTUMN);
 
+  img_rgb_masked = detector::ApplyMask(img_rgb, config_.mask_x, config_.mask_y, config_.mask_w, config_.mask_h);
+
+
   // Show images
-	cv::imshow("rgb", img_rgb);
-	cv::imshow("depth", img_depth);
-	cv::imshow("diff", img_diff);
-  cv::imshow("diff masked", img_diff_masked);
+  cv::imshow("rgb masked", img_rgb_masked);
+	//cv::imshow("rgb", img_rgb);
+	//cv::imshow("depth", img_depth);
+	//cv::imshow("diff", img_diff);
+  //cv::imshow("diff masked", img_diff_masked);
   cv::imshow("binary", img_binary);
-  cv::imshow("depth test", falseColorMap);
+  //cv::imshow("depth test", falseColorMap);
   cv::waitKey(1);
 }
 
@@ -144,7 +148,7 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
   std::vector<std::vector<cv::Point>> contours;
   findContours(img_binary, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
   cv::Mat filledContours = detector::FillContours(img_binary, contours);
-  cv::imshow("filled", filledContours);
+  cv::imshow("binary image filled", filledContours);
 
   // Find contours again after filling
   std::vector<std::vector<cv::Point>> contours2;
@@ -172,8 +176,6 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
     {
       new_objects.push_back(labels[i]);
       new_rot_rects.push_back(rot_rects[i]);
-
-      std::cout << "Angle of detected rot_rect: " << rot_rects[i].angle << std::endl;
     }
   }
 

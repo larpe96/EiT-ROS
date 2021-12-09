@@ -77,6 +77,7 @@ class PoseEstimation
     cv::Mat img_diff_masked;
     cv::Mat img_diff;
     cv::Mat img_binary;
+    cv::Mat img_rgb_masked;
 
     std::vector<std::string> object_ids;
     //std::string object_ids[100] = {};

@@ -218,7 +218,7 @@ cv::Mat eulerAnglesToRotationMatrix(cv::Vec3f &theta)
         rot_rects[i].points( rect_points );
         for ( int j = 0; j < 4; j++ )
         {
-            line( drawing, rect_points[j], rect_points[(j+1)%4], color );
+            line( drawing, rect_points[j], rect_points[(j+1)%4], color , 3);
         }
     }
     cv::imshow( "Contours", drawing );

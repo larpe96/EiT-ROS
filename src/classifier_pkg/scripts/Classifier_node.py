@@ -23,9 +23,9 @@ class Classifier_ros_node:
             label, prob = self.cf.classify(data)
             mask = False
             class_label = "False detection"
-            print("data: ", data)
-            print("prob: ", prob)
-            print("label: ", label)
+            #print("data: ", data)
+            #print("prob: ", prob)
+            #print("label: ", label)
             if param.width > 15 and param.height > 15:
                 #mask = False
                 #class_label = "False detection"
