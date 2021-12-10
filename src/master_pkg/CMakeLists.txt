@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   position_controller_pkg
   enviroment_controller_pkg
   parts_list_pkg
+  ur_robot_pkg
   roscpp
   std_msgs
   sensor_msgs
@@ -46,7 +47,6 @@ gripper_Move.srv
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################
-
 
  generate_messages(
    DEPENDENCIES

@@ -37,7 +37,7 @@ bool MasterNode::initGraspSeq(std_srvs::Trigger::Request  &req,
   if (state == ready)
   {
     bool status = callServicePoseEstimate();
-    callServiceMissingParts();
+    //callServiceMissingParts();
 
     state = get_pose;
     res.success = 1;
@@ -127,6 +127,13 @@ int MasterNode::setupServices()
   {
     return 0;
   }
+
+  setupBool = ros::service::waitForService("/GET/tcp_pose_srv", 10);
+  if (setupBool == 0)
+  {
+    return 0;
+  }
+  
   //client services
   pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
   missing_parts_client = n.serviceClient<parts_list_pkg::missing_parts>("missing_parts_srv");
@@ -137,6 +144,8 @@ int MasterNode::setupServices()
   gripper_move_client = n.serviceClient<master_pkg::gripper_Move>("wsg_50_driver/move");
   gripper_grasp_client = n.serviceClient<master_pkg::gripper_Move>("wsg_50_driver/grasp");
   gripper_set_force_client = n.serviceClient<master_pkg::gripper_Conf>("wsg_50_driver/set_force");
+
+  get_tcp_client = n.serviceClient<ur_robot_pkg::CurrTCPPose>("/GET/tcp_pose_srv");
 
   drop_off_poses_client = n.serviceClient<enviroment_controller_pkg::module_poses_srv>("get_module_drop_off_poses");
   pickup_db_client = n.serviceClient<pickup_db::pickup_db_srv>("pickup_db");
@@ -261,19 +270,19 @@ void MasterNode::callServiceMissingParts()
     parts_list_pkg::missing_parts MP_msg;
     MP_msg.request.detected_parts = obj_ids;
     missing_parts_client.call(MP_msg);
-    if(MP_msg.response.missing_parts.size() > 0)
-    {
-        std::string output = "Missing Parts: ";
-        for(int i = 0; i < MP_msg.response.missing_parts.size(); i++)
-        {
-          output = output + MP_msg.response.missing_parts[i] + ",  ";
-        }
-        ROS_INFO_STREAM(output);
-    }
-    else
-    {
-        ROS_INFO_STREAM("Missing Parts: None");
-    }
+    // if(MP_msg.response.missing_parts.size() > 0)
+    // {
+    //     std::string output = "Missing Parts: ";
+    //     for(int i = 0; i < MP_msg.response.missing_parts.size(); i++)
+    //     {
+    //       output = output + MP_msg.response.missing_parts[i] + ",  ";
+    //     }
+    //     ROS_INFO_STREAM(output);
+    // }
+    // else
+    // {
+    //     ROS_INFO_STREAM("Missing Parts: None");
+    // }
 }
 
 
@@ -299,6 +308,30 @@ int MasterNode::callServicePoseEstimate()
     else
     {
         ROS_ERROR("Failed to call service: %s", pose_estim_client.getService().c_str());
+        return 0;
+    }
+
+}
+
+bool MasterNode::callServiceGetTCP()
+{
+    ur_robot_pkg::CurrTCPPose msg;
+
+    if(get_tcp_client.call(msg))
+    {
+        if (msg.response.position.position.x == 0)
+          {
+            return 0;
+          }
+        else
+        {
+          robot_pose = msg.response.position;
+          return 1;
+        }
+    }
+    else
+    {
+        ROS_ERROR("Failed to call service: %s", get_tcp_client.getService().c_str());
         return 0;
     }
 
@@ -374,12 +407,12 @@ std::string MasterNode::getState()
   return state_name[state];
 }
 
-void MasterNode::WriteToCSV(int id, geometry_msgs::Pose pose_estimated)
+void MasterNode::WriteToCSV(int id, geometry_msgs::Pose pose_estimated, geometry_msgs::Pose curr_robot_pose)
 {
-  std::cout << test << pose_estimated.position.x << "," << pose_estimated.position.y << std::endl;
+  std::cout << id << " " << pose_estimated.position.x << "," << pose_estimated.position.y << "," << curr_robot_pose.position.x << "," << curr_robot_pose.position.y<< " " << std::endl;
   std::ofstream calibration_test_output( "calibration_test.csv", std::ios::app ) ;
-  calibration_test_output << "id, x_est, y_est, \n";
-  calibration_test_output << id << "," << pose_estimated.position.x << "," << pose_estimated.position.y << "\n";
+  //calibration_test_output << "id, x_est, y_est, \n";
+  calibration_test_output << id << "," << pose_estimated.position.x << "," << pose_estimated.position.y<< "," << curr_robot_pose.position.x << "," << curr_robot_pose.position.y << "\n";
   calibration_test_output.close();
 }
 
@@ -526,11 +559,18 @@ void MasterNode::stateLoop()
     }
   case  pose_est:
     {
-      int res = callServicePoseEstimate();
+      int res = callServiceGetTCP();
+      if(res == 0)
+      {
+        ROS_ERROR("NO PREDICTTION");
+        state = error;
+        break;
+      }
+      res = callServicePoseEstimate();
       
       if( res == 1 )
       {
-        WriteToCSV(current_id,obj_pose);
+        WriteToCSV(current_id,obj_pose,robot_pose);
         state = approach_pose_random;
       }
       else if(res == 0)

@@ -30,6 +30,8 @@ class Robot(RTDEControl, RTDEReceive, RTDEIO):
         req_pose = req.pose
         vel = req.vel
         acc = req.acc
+        vel = 3
+        acc = 2
         req_q = R.from_quat([req_pose.orientation.x, req_pose.orientation.y, req_pose.orientation.z, req_pose.orientation.w])
         req_pos = [req_pose.position.x,req_pose.position.y,req_pose.position.z]
         ur_pose = np.ravel([req_pos,req_q.as_rotvec()])

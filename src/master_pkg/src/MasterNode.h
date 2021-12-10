@@ -19,6 +19,7 @@
 #include "position_controller_pkg/Pre_def_pose.h"
 
 #include "enviroment_controller_pkg/module_poses_srv.h"
+#include "ur_robot_pkg/CurrTCPPose.h"
 
 #include "master_pkg/system_state_srv.h"
 #include "master_pkg/gripper_Move.h"
@@ -73,8 +74,9 @@ protected:
   bool callServiceObjDropOff(std::string obj_type);
   bool callServicePickupDB(std::string obj_type, geometry_msgs::Pose pose_estimated);
   bool callServicePreMove(std::string pose_name);
+  bool callServiceGetTCP();
 
-  void WriteToCSV(int id, geometry_msgs::Pose pose_estimated);
+  void WriteToCSV(int , geometry_msgs::Pose,geometry_msgs::Pose);
 
   int setupServices();
   bool setupNodes();
@@ -103,6 +105,10 @@ protected:
 
   ros::ServiceClient pickup_db_client;
 
+  ros::ServiceClient get_tcp_client;
+
+
+
 
 
   State state = init;
@@ -121,8 +127,7 @@ protected:
   geometry_msgs::Pose drop_off_pose;
   int first_time_ready = 1;
 
-  geometry_msgs::Pose random_pose;
-  geometry_msgs::Pose random_pose_above;
+  geometry_msgs::Pose robot_pose;
   
   int current_id = 0;
 };
