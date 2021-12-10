@@ -67,7 +67,6 @@ bool MasterNode::setupNodes()
     return 0;
   }
 
-
   return 1;
 }
 int MasterNode::setupServices()
@@ -123,11 +122,17 @@ int MasterNode::setupServices()
     return 0;
   }
 
+  setupBool = ros::service::waitForService("move2_def_pos_srv", 10);
+  if (setupBool == 0)
+  {
+    return 0;
+  }
   //client services
   pose_estim_client = n.serviceClient<pose_estimation::pose_est_srv>("pose_est");
   missing_parts_client = n.serviceClient<parts_list_pkg::missing_parts>("missing_parts_srv");
   tcp_control_client = n.serviceClient<position_controller_pkg::Tcp_move>("move2_pos_srv");
   robot_home_control_client = n.serviceClient<std_srvs::Trigger>("SET/robot_home");
+  tcp_pre_def_control_client = n.serviceClient<position_controller_pkg::Pre_def_pose>("move2_def_pos_srv");
 
   gripper_move_client = n.serviceClient<master_pkg::gripper_Move>("wsg_50_driver/move");
   gripper_grasp_client = n.serviceClient<master_pkg::gripper_Move>("wsg_50_driver/grasp");
@@ -164,6 +169,30 @@ bool MasterNode::callServiceObjDropOff(std::string obj_type1)
       approach_drop_off_pose = srv.response.approach_pose;
     }
    return 1;
+}
+
+bool MasterNode::callServicePreMove(std::string pose_name)
+{
+    position_controller_pkg::Pre_def_pose msg;
+
+    msg.request.pre_def_pose = pose_name;
+
+    if (!tcp_pre_def_control_client.call(msg))
+    {
+        ROS_ERROR("Failed to call service: %s", tcp_pre_def_control_client.getService().c_str());
+        return 0;
+    }
+
+    if (msg.response.succes != 1)
+    {
+
+      ROS_ERROR("Robot could not move. Error code: %d",msg.response.succes);
+      return 0;
+    }
+    else
+    {
+      return 1;
+    }
 }
 
 bool MasterNode::callServiceGripperMove(float width,float speed)
@@ -345,6 +374,17 @@ std::string MasterNode::getState()
   return state_name[state];
 }
 
+void MasterNode::WriteToCSV(int id, geometry_msgs::Pose pose_estimated)
+{
+  std::cout << test << pose_estimated.position.x << "," << pose_estimated.position.y << std::endl;
+  std::ofstream calibration_test_output( "calibration_test.csv", std::ios::app ) ;
+  calibration_test_output << "id, x_est, y_est, \n";
+  calibration_test_output << id << "," << pose_estimated.position.x << "," << pose_estimated.position.y << "\n";
+  calibration_test_output.close();
+}
+
+
+
 void MasterNode::stateLoop()
 {
   switch(state) {
@@ -366,10 +406,20 @@ void MasterNode::stateLoop()
     break;
   case ready:
     {
+
       break;
     }
   case  get_pose:
     {
+      state = callServiceGripperMove(100,250) ? get_pose : error;
+      
+      state = callServiceGoHome() ? get_pose : error;
+
+      if (state == error)
+      {
+        break;
+      }
+      
       int res = 0;
       obj_ids.clear();
 
@@ -439,8 +489,7 @@ void MasterNode::stateLoop()
       res = callServiceTcpMove(pose_pickup_approach);
       if (res == 1)
       {
-        state = callServiceGoHome() ? move_to_approach_drop_off : error;
-        //state = move_to_approach_drop_off;
+        state = callServiceGoHome() ? approach_place_random : error;
       }
       else
       {
@@ -448,31 +497,71 @@ void MasterNode::stateLoop()
       }
       break;
     }
-  case  move_to_approach_drop_off:
+  case  approach_place_random:
     {
-      int res = callServiceObjDropOff(obj_ids[0]);
-      if (res == 0)
+      state = callServicePreMove("above_"+std::to_string(current_id)) ? place_random : error;
+      
+      break;
+    }
+  case  place_random:
+    {
+      state =callServicePreMove("place_"+std::to_string(current_id)) ? move_away_random : error;
+      if(state == error)
       {
-        state = error;
+        break;
       }
-      else
+      state = callServiceGripperMove(100,250) ? move_away_random : error;
+      
+      break;
+    }
+  case  move_away_random:
+    {
+      state = callServicePreMove("above_"+std::to_string(current_id)) ? home : error;
+      break;
+    }
+  case  home:
+    {
+      state = callServiceGoHome() ? pose_est : error;
+      break;
+    }
+  case  pose_est:
+    {
+      int res = callServicePoseEstimate();
+      
+      if( res == 1 )
       {
-        state = callServiceTcpMove(approach_drop_off_pose) ? move_to_drop_off : error;
+        WriteToCSV(current_id,obj_pose);
+        state = approach_pose_random;
+      }
+      else if(res == 0)
+      {
+        ROS_ERROR("NO PREDICTTION");
+        state = error;
       }
       break;
     }
-  case  move_to_drop_off:
-    state = callServiceTcpMove(drop_off_pose) ? drop_obj : error;
-    break;
-  case  drop_obj:
-    state = callServiceGripperMove(100,250) ? move_to_deproach_drop_off : error;
-    break;
-  case  move_to_deproach_drop_off:
-    state = callServiceTcpMove(approach_drop_off_pose) ? home : error;
-    break;
-  case  home:
-    state = callServiceGoHome() ? get_pose : error;
-    break;
+  case  approach_pose_random:
+    {
+      state = callServicePreMove("above_"+std::to_string(current_id)) ? grasp_obj_to_place : error;
+      break;
+    }
+  case  grasp_obj_to_place:
+    {
+      state = callServicePreMove("place_"+std::to_string(current_id)) ? move_away_random_again : error;
+      if(state == error)
+      {
+        break;
+      }
+      
+      state = callServiceGripperGrasp(gripper_open_width, 250) ? move_away_random_again : error;
+      break;
+    }
+  case  move_away_random_again:
+    {
+      state =  callServicePreMove("above_"+std::to_string(current_id)) ? approach_place_random : error;
+      current_id = current_id + 1;
+      break;
+    }
   default:
     ROS_ERROR("Master State is in error state");
     break;

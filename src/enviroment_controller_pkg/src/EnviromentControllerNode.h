@@ -21,6 +21,8 @@ using namespace std;
 using json = nlohmann::json;
 namespace pt = boost::property_tree;
 
+#define service_list = 
+
 class EnviromentControllerNode
 {
 public:

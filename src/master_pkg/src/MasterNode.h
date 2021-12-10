@@ -26,10 +26,9 @@
 
 #include "pickup_db/pickup_db_srv.h"
 
-#define home_pose_name  "pose_2"
-#define grasp_pose_name "pose_0"
-#define approach_pose_name "pose_1"
-#define drop_off_pose_name "pose_99"
+#include <fstream>
+
+#include "Matrix.h"
 
 enum State
 {
@@ -41,11 +40,14 @@ enum State
   move_to_pose,
   grasp_obj,
   deproach_pose,
-  move_to_approach_drop_off,
-  move_to_drop_off,
-  drop_obj,
-  move_to_deproach_drop_off,
-  home
+  approach_place_random,
+  place_random,
+  move_away_random,
+  home,
+  pose_est,
+  approach_pose_random,
+  grasp_obj_to_place,
+  move_away_random_again
 };
 
 class MasterNode
@@ -70,8 +72,9 @@ protected:
   bool callServiceGoHome();
   bool callServiceObjDropOff(std::string obj_type);
   bool callServicePickupDB(std::string obj_type, geometry_msgs::Pose pose_estimated);
+  bool callServicePreMove(std::string pose_name);
 
-
+  void WriteToCSV(int id, geometry_msgs::Pose pose_estimated);
 
   int setupServices();
   bool setupNodes();
@@ -91,6 +94,7 @@ protected:
 
   ros::ServiceClient tcp_control_client;
   ros::ServiceClient robot_home_control_client;
+  ros::ServiceClient tcp_pre_def_control_client;
 
   ros::ServiceClient drop_off_poses_client;
 
@@ -103,9 +107,8 @@ protected:
 
   State state = init;
   ros::NodeHandle n;
-  const char *state_name[13] = { "error","init", "ready", "get_pose","approach_pose",
-                            "move_to_pose","grasp_obj", "deproach_pose" , "move_to_approach_drop_off",
-                            "move_to_drop_off","drop_obj","move_to_deproach_drop_off", "home"};
+  const char *state_name[16] = { "error","init", "ready", "get_pose","approach_pose",
+                            "move_to_pose","grasp_obj", "deproach_pose" ,"approach_place_random", "place_random","move_away_random","home","pose_est","approach_pose_random","grasp_obj_to_place","move_away_random_again"};
                             
   geometry_msgs::Pose obj_pose;
   geometry_msgs::Pose pose_pickup;
@@ -116,6 +119,12 @@ protected:
   
   geometry_msgs::Pose approach_drop_off_pose;
   geometry_msgs::Pose drop_off_pose;
+  int first_time_ready = 1;
+
+  geometry_msgs::Pose random_pose;
+  geometry_msgs::Pose random_pose_above;
+  
+  int current_id = 0;
 };
 
 #endif // MASTER_NODE_H
