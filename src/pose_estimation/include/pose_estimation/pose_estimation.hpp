@@ -105,6 +105,6 @@ class PoseEstimation
     float true_positive=0, tot_gt=0;
     
     void loadNextImagePair(std::string rgbFile, std::string depthFile);
-    fstream classDataFile;
-    classDataFile.open("~/class_data.csv",std::fstream::in | std::fstream::out);
+    std::fstream classDataFile;
+    // classDataFile.open("~/class_data.csv",std::fstream::in | std::fstream::out);
 };

@@ -185,7 +185,7 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
             true_positive++;
             ROS_INFO("LABEL is the same as GT");
             // NEED to Assign class correctly
-            classDataFile << std::stoi(gtLabel.at(j))<<","<<labels[i]<<std::endl; 
+            // classDataFile << std::stoi(gtLabel.at(j))<<","<<labels[i]<<std::endl; 
           }
         }        
       }
