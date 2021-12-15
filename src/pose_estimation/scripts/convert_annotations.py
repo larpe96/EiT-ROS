@@ -15,13 +15,19 @@ output_folder = "data_vis_v1"
 
 #os.mkdir(output_folder)
 
+bad_imgs = [32,33,34]
+
 all_files = os.listdir(path)
 
 
 annotation_files = []
 for file in all_files:
     if file[-5:]  == '.json':
-        annotation_files.append(file)
+        print(np.isin(int(file.split("_")[1].split(".")[0]),bad_imgs))
+        if not np.isin(int(file.split("_")[1].split(".")[0]),bad_imgs):
+            annotation_files.append(file)
+        else:
+            pass
 
 with open(output_file_name, 'w', newline='') as open_file:
     writer = csv.writer(open_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -45,7 +51,7 @@ with open(output_file_name, 'w', newline='') as open_file:
                         rot_rect = (rot_rect[0],rot_rect[1],rot_rect[-1]-180)
                     if rot_rect[-1] < -90:
                         rot_rect = (rot_rect[0],rot_rect[1],rot_rect[-1]+180)
-                    print(rot_rect)
+                    #print(rot_rect)
                     class_name = annotation['label']
                     class_name = int(class_name[-1])
                     img_id = int(str(image_name).split("_")[-1].split(".")[0])

@@ -36,7 +36,7 @@ def crop_rect(img, rect):
 class Classifier:
     def __init__(self) -> None:
         self.method = None
-        self.path = "./matlab_data_v1.csv"
+        self.path = "/home/user/workspace/src/pose_estimation/data/V5/matlab_data_v5.csv"
         self.huDatasetPath = "/home/user/workspace/src/pose_estimation/data/V4"
         self.files = []
 
@@ -158,6 +158,6 @@ if __name__ =="__main__":
     prediction = classifier.predict_class(classifier.X_test)
     probability = classifier.predict_probability(classifier.X_test)
     score = cross_val_score(classifier.model, classifier.X_test, classifier.Y_test, cv=2)
-
+    # classifier.save_model()
     print(score.mean())
     print(score.std())

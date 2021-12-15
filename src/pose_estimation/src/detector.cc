@@ -197,6 +197,7 @@ cv::Mat eulerAnglesToRotationMatrix(cv::Vec3f &theta)
         }
     }
     cv::imshow( "Contours", drawing );
+    cv::waitKey(20);
   }
 
   std::vector<cv::Mat> convert_2_transforms(std::vector<cv::RotatedRect> rot_rect, std::vector<float> depth, int img_w, int img_h, float f_x, float f_y, cv::Mat camera2base)

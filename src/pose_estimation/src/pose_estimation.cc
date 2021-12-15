@@ -1,7 +1,8 @@
 #include <pose_estimation/pose_estimation.hpp>
 
 PoseEstimation::PoseEstimation(): nh_("~"), dynamic_reconfigure_server_(nh_)
-{}
+{
+}
 
 void PoseEstimation::Initialize(const ros::NodeHandle& nh)
 {
@@ -11,6 +12,7 @@ void PoseEstimation::Initialize(const ros::NodeHandle& nh)
   dynamic_reconfigure::Server<DynamicReconfigureType>::CallbackType f;
   f = boost::bind(&PoseEstimation::OnDynamicReconfigure, this, _1, _2);
   dynamic_reconfigure_server_.setCallback(f);
+  sub_groundTruth= nh_.subscribe("/GT_rects", 20, &PoseEstimation::compareToGT, this);
 }
 
 void PoseEstimation::OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, const sensor_msgs::ImageConstPtr& img_depth_msg)
@@ -65,14 +67,14 @@ void PoseEstimation::OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, cons
   cv::applyColorMap(adjMap, falseColorMap, cv::COLORMAP_AUTUMN);
 
   // Show images
-	cv::imshow("rgb", img_rgb);
-	cv::imshow("depth", img_depth);
-	cv::imshow("diff", img_diff);
-  cv::imshow("diff masked", img_diff_masked);
-  cv::imshow("binary", img_binary);
-  cv::imshow("depth test", falseColorMap);
-  cv::waitKey(1);
-}
+	// cv::imshow("Current", img_rgb);
+	// cv::imshow("depth", img_depth);
+	// cv::imshow("diff", img_diff);
+  // cv::imshow("diff masked", img_diff_masked);
+  // cv::imshow("binary", img_binary);
+  // cv::imshow("depth test", falseColorMap);
+  // cv::waitKey(10);
+ }
 
 
 bool PoseEstimation::Estimate_pose(pose_estimation::pose_est_srv::Request   &req,
@@ -144,7 +146,8 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
   std::vector<std::vector<cv::Point>> contours;
   findContours(img_binary, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
   cv::Mat filledContours = detector::FillContours(img_binary, contours);
-  cv::imshow("filled", filledContours);
+  // cv::imshow("filled", filledContours);
+  // cv::waitKey(10);
 
   // Find contours again after filling
   std::vector<std::vector<cv::Point>> contours2;
@@ -156,11 +159,40 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
   // Find rotated rects
   std::vector<cv::RotatedRect> rot_rects = detector::FindRotatedRects(contours2);
 
+  // detector::ShowDetections(img_rgb, contours2,rot_rects);
+
+
   // Classify detections
   std::vector<std::string> labels;
   std::vector<int> mask;
   
   bool res = callClassifier(rot_rects, labels, mask);
+  
+  if (validate)
+  {
+
+    for(int i=0; i<rot_rects.size(); ++i)
+    {
+      cv::RotatedRect pred_rot_rect = rot_rects.at(i);
+      for(size_t j =0; j<gt_rot_rect.size();++j)
+      {
+        cv::RotatedRect gt_rot = gt_rot_rect.at(j);
+        float iou = iouRotatedRects(pred_rot_rect, gt_rot);
+        if (iou> 0.5)
+        {
+          if (gtLabel.at(j) == labels[i])
+          {
+            true_positive++;
+            ROS_INFO("LABEL is the same as GT");
+            // NEED to Assign class correctly
+            classDataFile << std::stoi(gtLabel.at(j))<<","<<labels[i]<<std::endl; 
+          }
+        }        
+      }
+    }
+    float accuracy = true_positive/tot_gt;
+    std::cout<<"current Accuracy:\t"<< accuracy<<"\t"<<true_positive <<std::endl;
+  }
 
   // Push correctly classified objects to the output vector
   std::vector<std::string> new_objects;
@@ -242,7 +274,7 @@ void PoseEstimation::OnDynamicReconfigure(PoseEstimation::DynamicReconfigureType
             *subscriber_rgb_,
             *subscriber_depth_
           );
-  camera_sync_->registerCallback(boost::bind(&PoseEstimation::OnImage, this, _1, _2));
+  camera_sync_->registerCallback(boost::bind(&PoseEstimation::OnImage, this, _1, _1));
   }
 
   // Service
@@ -254,3 +286,93 @@ void PoseEstimation::OnDynamicReconfigure(PoseEstimation::DynamicReconfigureType
   }
 }
 
+void PoseEstimation::compareToGT(pose_estimation::groundTruth msg)
+{
+  gtLabel.clear();
+  gt_rot_rect.clear();
+  for (int i=0; i<msg.cx.size(); i++)
+  {
+    tot_gt++;
+    cv::Point2f center_p(msg.cx[i], msg.cy[i]); 
+    cv::RotatedRect tmp_rect= cv::RotatedRect(center_p, cv::Size2f(msg.width[i], msg.height[i]), msg.angle[i]);
+    gt_rot_rect.push_back(tmp_rect); 
+    std::string temp_label = msg.label.at(i);
+    gtLabel.push_back(temp_label);
+  }
+  loadNextImagePair(msg.rgbFile, msg.depthFile);
+
+  return;
+}
+
+float PoseEstimation::iouRotatedRects(cv::RotatedRect pred_rot_rects,cv::RotatedRect gt_rot_rects)
+{
+
+      // compute intersection area
+    std::vector<cv::Point2f> intersections_unsorted;
+    std::vector<cv::Point2f> intersections;
+    cv::rotatedRectangleIntersection(pred_rot_rects, gt_rot_rects, intersections_unsorted);
+    
+    if (intersections_unsorted.size() < 3) {
+      return 0;
+    }
+    // need to sort the vertices CW or CCW
+    cv::convexHull(intersections_unsorted, intersections);
+
+    // Shoelace formula
+    float intersection_area = 0;
+    for (unsigned int i = 0; i < intersections.size(); ++i) {
+      const auto& pt = intersections[i];
+      const unsigned int i_next = (i + 1) == intersections.size() ? 0 : (i + 1);
+      const auto& pt_next = intersections[i_next];
+      intersection_area += (pt.x * pt_next.y - pt_next.x * pt.y);
+    }
+    intersection_area = std::abs(intersection_area) / 2;
+
+    // compute union area
+    const float area_GT = gt_rot_rects.size.area();
+    const float area_detection = pred_rot_rects.size.area();
+    const float union_area = area_GT + area_detection - intersection_area;
+    
+    // intersection over union
+    const float overlap_score = intersection_area / union_area;
+    return abs(overlap_score);
+}
+
+
+void PoseEstimation::loadNextImagePair(std::string rgbFile, std::string depthFile)
+{
+  img_rgb = cv::imread(rgbFile);
+  img_depth = cv::imread(depthFile);
+
+   // Get diff image
+  bool use_DiffNorm = 1;
+  if(use_DiffNorm)
+  {
+    img_diff = detector::DiffNorm(img_rgb, img_empty_background);
+  }
+  else
+  {
+    cv::absdiff(img_rgb, img_empty_background, img_diff);
+    
+    // Grey
+    cv::cvtColor(img_diff, img_diff, cv::COLOR_BGR2GRAY);
+  }
+
+  // Apply mask
+  img_diff_masked = detector::ApplyMask(img_diff, config_.mask_x, config_.mask_y, config_.mask_w, config_.mask_h);
+
+  // Threshold back projected image to create a binary mask og the projected image
+  cv::threshold(img_diff_masked, img_binary, config_.threshold_binary, 255.0, cv::THRESH_BINARY);
+
+  // Erode binary image
+  img_binary = detector::ErodeAndDilate(img_binary, config_.erosion_size, config_.dilation_size);
+
+  // Image for testing depth registration
+  double max = 1;
+  double min = 0;
+  cv::Mat falseColorMap;
+  cv::Mat adjMap;
+  cv::minMaxIdx(img_depth, &min, &max);
+  img_depth.convertTo(adjMap, CV_8UC1, 255 / (max-min), -min);
+  cv::applyColorMap(adjMap, falseColorMap, cv::COLORMAP_AUTUMN); 
+}

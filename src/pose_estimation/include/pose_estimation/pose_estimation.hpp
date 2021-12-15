@@ -7,6 +7,10 @@
 #include "classifier_pkg/classify_detections.h"
 #include "classifier_pkg/Classification_params.h"
 
+// Custom Messages
+#include "pose_estimation/groundTruth.h"
+
+
 // ROS
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
@@ -47,6 +51,8 @@ class PoseEstimation
     void OnDynamicReconfigure(DynamicReconfigureType& config, uint32_t level);
     cv::Mat rotationMatrixToEulerAngles(cv::Mat R);
     cv::Mat eulerAnglesToRotationMatrix(cv::Vec3f &theta);
+    void compareToGT(pose_estimation::groundTruth msg);
+    float iouRotatedRects(cv::RotatedRect pred_rot_rects,cv::RotatedRect gt_rot_rects);
 
   private:
     /// Node handler
@@ -55,6 +61,10 @@ class PoseEstimation
     ros::ServiceServer service_;
     /// ROS service handle <- for classification
     ros::ServiceClient classify_detections = nh_.serviceClient<classifier_pkg::classify_detections>("/classify_detections_srv");
+    // ROS message handle for evaluation ground truth
+    std::vector<cv::RotatedRect> gt_rot_rect;
+    std::vector<std::string> gtLabel;
+    ros::Subscriber sub_groundTruth=nh_.subscribe("/GT_rects", 20, &PoseEstimation::compareToGT, this); 
     /// Camera synchronizer policy
     using CameraSyncPolicy = message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image>;
     /// Camera synchronizer
@@ -88,4 +98,13 @@ class PoseEstimation
                                                     0.06082479228194684, 0.01013250596365761, -0.9980970278318407, 0.5500317523427357,
                                                     0, 0, 0, 1);
     bool service_started = false;
+
+    // Validation 
+    // int timesRecieved = 0;
+    bool validate = true;
+    float true_positive=0, tot_gt=0;
+    
+    void loadNextImagePair(std::string rgbFile, std::string depthFile);
+    fstream classDataFile;
+    classDataFile.open("~/class_data.csv",std::fstream::in | std::fstream::out);
 };
