@@ -26,6 +26,7 @@
 #include <string>
 #include <ctime>
 #include <fstream>
+#include <ostream>
 #include <iostream>
 #include <vector>
 
@@ -42,6 +43,7 @@ class PoseEstimation
       DynamicReconfigureServerType;
 
     PoseEstimation();
+    void setFiles();
     void Initialize(const ros::NodeHandle &nh);
     void OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, const sensor_msgs::ImageConstPtr& img_depth_msg);
     bool Estimate_pose(pose_estimation::pose_est_srv::Request   &req, pose_estimation::pose_est_srv::Response  &res);
@@ -84,7 +86,7 @@ class PoseEstimation
     /// Image with empty background used as reference image
     cv::Mat img_empty_background;
 
-    cv::Mat img_diff_masked;
+    cv::Mat img_diff_masked, rgb_masked;
     cv::Mat img_diff;
     cv::Mat img_binary;
 
@@ -105,6 +107,9 @@ class PoseEstimation
     float true_positive=0, tot_gt=0;
     
     void loadNextImagePair(std::string rgbFile, std::string depthFile);
-    std::fstream classDataFile;
-    // classDataFile.open("~/class_data.csv",std::fstream::in | std::fstream::out);
+    std::fstream poseDataFile;
+    // std::fstream classDataFile;//("~/class_data.csv",std::fstream::in | std::fstream::out);
+    // std::fstream poseDataFile;//("~/pose_data.csv", std::fstream::in | std::fstream::out);
+    // classDataFile.open("/home/user/workspace/class_data.csv",std::fstream::out | std::fstream::app);
+    // poseDataFile.open("/home/user/workspace/pose_data.csv", std::fstream::out | std::fstream::app);
 };

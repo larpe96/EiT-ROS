@@ -131,10 +131,7 @@ if __name__ =="__main__":
     except ROSInterruptException:
         pass
     except:
+        _ip = "127.0.0.1" # VM
         print("robot connection failed")
         print("Trying VM")
-#        try:
-#            _ip = "127.0.0.1" # VM
-#            ser_node = Servicenode(_ip)
-#        except ROSInterruptException:
-#            pass
+        ser_node = Servicenode(_ip)

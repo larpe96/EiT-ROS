@@ -15,6 +15,12 @@ void PoseEstimation::Initialize(const ros::NodeHandle& nh)
   sub_groundTruth= nh_.subscribe("/GT_rects", 20, &PoseEstimation::compareToGT, this);
 }
 
+void PoseEstimation::setFiles()
+{
+  poseDataFile.open("/home/user/workspace/pose_dataV4.csv",std::fstream::out);// | std::fstream::app);
+}
+
+
 void PoseEstimation::OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, const sensor_msgs::ImageConstPtr& img_depth_msg)
 {
 	cv_bridge::CvImagePtr cv_ptr;
@@ -50,6 +56,7 @@ void PoseEstimation::OnImage(const sensor_msgs::ImageConstPtr& img_rgb_msg, cons
 
   // Apply mask
   img_diff_masked = detector::ApplyMask(img_diff, config_.mask_x, config_.mask_y, config_.mask_w, config_.mask_h);
+  rgb_masked = detector::ApplyMask(img_rgb, config_.mask_x, config_.mask_y, config_.mask_w, config_.mask_h);
 
   // Threshold back projected image to create a binary mask og the projected image
   cv::threshold(img_diff_masked, img_binary, config_.threshold_binary, 255.0, cv::THRESH_BINARY);
@@ -142,6 +149,8 @@ bool PoseEstimation::callClassifier(std::vector<cv::RotatedRect> rot_rects, std:
 
 std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth, cv::Mat &img_binary)
 {
+ 
+
   // Find contours
   std::vector<std::vector<cv::Point>> contours;
   findContours(img_binary, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
@@ -174,21 +183,31 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
     for(int i=0; i<rot_rects.size(); ++i)
     {
       cv::RotatedRect pred_rot_rect = rot_rects.at(i);
+      size_t maxIOU_gtIDX;
+      float temp_maxIOU=0;
       for(size_t j =0; j<gt_rot_rect.size();++j)
       {
         cv::RotatedRect gt_rot = gt_rot_rect.at(j);
         float iou = iouRotatedRects(pred_rot_rect, gt_rot);
-        if (iou> 0.5)
+        if (iou > temp_maxIOU)
         {
-          if (gtLabel.at(j) == labels[i])
-          {
-            true_positive++;
-            ROS_INFO("LABEL is the same as GT");
-            // NEED to Assign class correctly
-            // classDataFile << std::stoi(gtLabel.at(j))<<","<<labels[i]<<std::endl; 
-          }
-        }        
+          maxIOU_gtIDX = int(j);
+          temp_maxIOU = iou;
+        }
       }
+      if (gtLabel.at(maxIOU_gtIDX) == labels[i])
+      {
+        true_positive++;
+        ROS_INFO("LABEL is the same as GT");
+      }
+      // SAVE BEST IOU as GT and Pred pair
+      cv::RotatedRect gt_temp = gt_rot_rect.at(maxIOU_gtIDX);
+      std::string gt_lab = "";
+      std::string pred_lab="";
+      gt_lab.append(gtLabel.at(maxIOU_gtIDX).begin()+4,gtLabel.at(maxIOU_gtIDX).end());
+      pred_lab.append(labels[i].begin()+4,labels[i].end());
+      // Labels, centerX, centerY, width, height angele Pairwise (GT, pred)
+      poseDataFile << gt_lab+","+pred_lab<<"," << std::to_string(temp_maxIOU)<<","<<std::to_string(gt_temp.center.x)<<","<< std::to_string(pred_rot_rect.center.x)<<","<< std::to_string(gt_temp.center.y)<<","<< std::to_string(pred_rot_rect.center.y)<<","<< std::to_string(gt_temp.size.width)<<","<<std::to_string(pred_rot_rect.size.width)<<","<<std::to_string(gt_temp.size.height)<<","<<std::to_string(pred_rot_rect.size.height)<<","<< std::to_string(gt_temp.angle)<<","<<std::to_string(pred_rot_rect.angle)<<std::endl;            
     }
     float accuracy = true_positive/tot_gt;
     std::cout<<"current Accuracy:\t"<< accuracy<<"\t"<<true_positive <<std::endl;
