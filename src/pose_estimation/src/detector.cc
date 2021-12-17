@@ -141,12 +141,37 @@ cv::Mat eulerAnglesToRotationMatrix(cv::Vec3f &theta)
 
   std::vector<cv::RotatedRect> FindRotatedRects(std::vector<std::vector<cv::Point>> contours)
   {
-      std::vector<cv::RotatedRect> rot_rect;
+      std::vector<cv::RotatedRect> rot_rects;
       for(int i = 0; i < contours.size(); i++)
       {
-          rot_rect.push_back(cv::minAreaRect(contours[i]));
+          //rot_rect.push_back(cv::minAreaRect(contours[i]));
+          cv::RotatedRect rot_rect = cv::minAreaRect(contours[i]);
+
+          float height = rot_rect.size.height;
+          float width = rot_rect.size.width;
+          if (width < height)
+          {
+            rot_rect.size.width = height;
+            rot_rect.size.height = width;
+            rot_rect.angle += 90;
+          }
+
+          if (rot_rect.angle > 0)
+          {
+            rot_rect.angle -= 180;
+          }
+
+          if (rot_rect.angle < -180)
+          {
+            rot_rect.angle += 180;
+          }
+
+          //rot_rect.angle = -abs(rot_rect.angle);
+          //rot_rect.angle = -180;
+
+          rot_rects.push_back(rot_rect);
       }
-      return rot_rect;
+      return rot_rects;
   }
 
   void SaveToFile(cv::Mat img_rgb, cv::Mat img_depth, std::vector<cv::RotatedRect> rot_rects)
