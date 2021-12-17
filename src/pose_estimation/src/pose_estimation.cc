@@ -17,7 +17,7 @@ void PoseEstimation::Initialize(const ros::NodeHandle& nh)
 
 void PoseEstimation::setFiles()
 {
-  poseDataFile.open("/home/user/workspace/pose_dataV4.csv",std::fstream::out);// | std::fstream::app);
+  poseDataFile.open("/home/user/workspace/pose_dataV5.csv",std::fstream::out);// | std::fstream::app);
 }
 
 
@@ -202,10 +202,16 @@ std::vector<cv::Mat> PoseEstimation::Detect(cv::Mat &img_rgb, cv::Mat &img_depth
       }
       // SAVE BEST IOU as GT and Pred pair
       cv::RotatedRect gt_temp = gt_rot_rect.at(maxIOU_gtIDX);
-      std::string gt_lab = "";
       std::string pred_lab="";
+      if (labels[i] != "False detection")
+      {
+        pred_lab.append(labels[i].begin()+4,labels[i].end());
+      }
+      else
+        pred_lab = "-1";
+      std::string gt_lab = "";
+      
       gt_lab.append(gtLabel.at(maxIOU_gtIDX).begin()+4,gtLabel.at(maxIOU_gtIDX).end());
-      pred_lab.append(labels[i].begin()+4,labels[i].end());
       // Labels, centerX, centerY, width, height angele Pairwise (GT, pred)
       poseDataFile << gt_lab+","+pred_lab<<"," << std::to_string(temp_maxIOU)<<","<<std::to_string(gt_temp.center.x)<<","<< std::to_string(pred_rot_rect.center.x)<<","<< std::to_string(gt_temp.center.y)<<","<< std::to_string(pred_rot_rect.center.y)<<","<< std::to_string(gt_temp.size.width)<<","<<std::to_string(pred_rot_rect.size.width)<<","<<std::to_string(gt_temp.size.height)<<","<<std::to_string(pred_rot_rect.size.height)<<","<< std::to_string(gt_temp.angle)<<","<<std::to_string(pred_rot_rect.angle)<<std::endl;            
     }
